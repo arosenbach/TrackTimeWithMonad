@@ -25,10 +25,6 @@ public class Log<T> {
         return new Log<>(value, new ArrayList<>());
     }
 
-    public static <U> Log<U> trace(final U value, final String methodName, final Stopwatch time) {
-        return new Log<U>(value, Collections.singletonList(methodName + "->" + time.elapsed(TimeUnit.MILLISECONDS) + "ms"));
-    }
-
     public <U> Log<U> flatMap(Function<T, Log<U>> mapper) {
         final Log<U> mapped = mapper.apply(value);
 
