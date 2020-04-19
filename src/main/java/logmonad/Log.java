@@ -1,11 +1,8 @@
 package logmonad;
 
-import com.google.common.base.Stopwatch;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public class Log<T> {
