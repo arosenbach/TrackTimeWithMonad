@@ -6,6 +6,7 @@ import com.google.common.collect.Iterables;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Timed<T> {
@@ -34,5 +35,13 @@ public class Timed<T> {
     public <U> Timed<U> flatMap(Function<T, Timed<U>> mapper) {
         final Timed<U> mapped = mapper.apply(value);
         return new Timed<>(mapped.value, ImmutableList.copyOf(Iterables.concat(stopwatches, mapped.stopwatches)));
+    }
+
+    public <U> Timed<U> append(BiFunction<T, U, U> append, final Timed<U> other) {
+        return new Timed<U>(append.apply(this.value, other.value), ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
+    }
+
+    public List<Stopwatch> getStopwatches() {
+        return this.stopwatches;
     }
 }

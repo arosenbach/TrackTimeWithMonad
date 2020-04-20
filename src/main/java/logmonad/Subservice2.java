@@ -11,4 +11,20 @@ public class Subservice2 {
         stopwatch.stop();
         return Timed.of(42, Collections.singletonList(stopwatch));
     }
+
+    public Timed<Integer> operation3(int param) {
+        Timed<Integer> result = Timed.of(param, Collections.singletonList(Stopwatch.createStarted()));
+        for(int i = param; i< param+10; i++){
+            result = result.append(Integer::sum, privateOperation(i));
+        }
+        return result;
+    }
+
+
+    private Timed<Integer> privateOperation(int i) {
+        final Stopwatch stopwatch = Stopwatch.createStarted();
+        DoStuff.run();
+        stopwatch.stop();
+        return Timed.of(1, Collections.singletonList(stopwatch));
+    }
 }

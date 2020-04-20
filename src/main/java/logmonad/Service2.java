@@ -2,6 +2,7 @@ package logmonad;
 
 import com.google.common.base.Stopwatch;
 
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 public class Service2 {
@@ -15,15 +16,21 @@ public class Service2 {
     }
 
     public void run() {
+
+        final Timed<Integer> timedResult = privateStuff()
+                .flatMap(s -> subservice1.operation1())
+                .flatMap(s -> subservice2.operation2(s))
+                .flatMap(s -> subservice2.operation3(s));
+
+        System.out.println("value: " + timedResult.get() + ", Total time: " + timedResult.elapsed(TimeUnit.MILLISECONDS) + "ms");
+        System.out.println("Details: ");
+        timedResult.getStopwatches().forEach(stopwatch -> System.out.println(stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms"));
+    }
+
+    private Timed<Class<Void>> privateStuff() {
         final Stopwatch stopwatch = Stopwatch.createStarted();
-
         DoStuff.run();
-        final Timed<Integer> subservice1Result = subservice1.operation1()
-                .flatMap(s -> subservice2.operation2(s));
-
-        stopwatch.stop();
-        System.out.println("value: " + subservice1Result.get() + " time: " + subservice1Result.elapsed(TimeUnit.MILLISECONDS) + "ms");
-        System.out.println("Total Elapsed time: " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms");
+        return Timed.of(Void.TYPE, Collections.singletonList(stopwatch));
     }
 
 }
