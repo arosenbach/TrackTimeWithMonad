@@ -1,6 +1,5 @@
 package logmonad;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
@@ -12,15 +11,15 @@ import java.util.function.Function;
 
 public class Timed<T> {
     private T value;
-    private List<Stopwatch> stopwatches;
+    private List<Truc> stopwatches;
 
-    private Timed(T value, final List<Stopwatch> stopwatches) {
+    private Timed(T value, final List<Truc> stopwatches) {
         this.value = value;
         this.stopwatches = ImmutableList.copyOf(stopwatches);
     }
 
-    public static <U> Timed<U> of(U value, final Stopwatch stopwatch) {
-        return new Timed<>(value, Collections.singletonList((stopwatch)));
+    public static <U> Timed<U> of(U value, final Truc stopwatch) {
+        return new Timed<>(value, Collections.singletonList(stopwatch));
     }
 
     public T get() {
@@ -42,7 +41,7 @@ public class Timed<T> {
         return new Timed<>(append.apply(this.value, other.value), ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
     }
 
-    public List<Stopwatch> getStopwatches() {
+    public List<Truc> getStopwatches() {
         return this.stopwatches;
     }
 }

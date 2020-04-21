@@ -24,13 +24,13 @@ public class Service2 {
 
         System.out.println("value: " + timedResult.get() + ", Total time: " + timedResult.elapsed(TimeUnit.MILLISECONDS) + "ms");
         System.out.println("Details: ");
-        timedResult.getStopwatches().forEach(stopwatch -> System.out.println(stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms"));
+        timedResult.getStopwatches().forEach(stopwatch -> System.out.println("**"+stopwatch.getName() + ": " + stopwatch.elapsed(TimeUnit.MILLISECONDS) + "ms"));
     }
 
     private Timed<Class<Void>> privateStuff() {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.run();
-        return Timed.of(Void.TYPE, stopwatch);
+        return Timed.of(Void.TYPE, Truc.of("Service2::privateStuff", stopwatch));
     }
 
 }
