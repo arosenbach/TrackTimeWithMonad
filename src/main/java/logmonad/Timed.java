@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -18,8 +19,8 @@ public class Timed<T> {
         this.stopwatches = ImmutableList.copyOf(stopwatches);
     }
 
-    public static <U> Timed<U> of(U value, final List<Stopwatch> stopwatches) {
-        return new Timed<>(value, stopwatches);
+    public static <U> Timed<U> of(U value, final Stopwatch stopwatch) {
+        return new Timed<>(value, Collections.singletonList((stopwatch)));
     }
 
     public T get() {
@@ -38,7 +39,7 @@ public class Timed<T> {
     }
 
     public <U> Timed<U> append(BiFunction<T, U, U> append, final Timed<U> other) {
-        return new Timed<U>(append.apply(this.value, other.value), ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
+        return new Timed<>(append.apply(this.value, other.value), ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
     }
 
     public List<Stopwatch> getStopwatches() {

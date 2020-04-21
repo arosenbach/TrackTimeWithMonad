@@ -18,9 +18,9 @@ public class Service2 {
     public void run() {
 
         final Timed<Integer> timedResult = privateStuff()
-                .flatMap(s -> subservice1.operation1())
-                .flatMap(s -> subservice2.operation2(s))
-                .flatMap(s -> subservice2.operation3(s));
+                .flatMap(subservice1::operation1)
+                .flatMap(subservice2::operation2)
+                .flatMap(subservice2::operation3);
 
         System.out.println("value: " + timedResult.get() + ", Total time: " + timedResult.elapsed(TimeUnit.MILLISECONDS) + "ms");
         System.out.println("Details: ");
@@ -30,7 +30,7 @@ public class Service2 {
     private Timed<Class<Void>> privateStuff() {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.run();
-        return Timed.of(Void.TYPE, Collections.singletonList(stopwatch));
+        return Timed.of(Void.TYPE, stopwatch);
     }
 
 }
