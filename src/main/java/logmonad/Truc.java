@@ -1,32 +1,61 @@
 package logmonad;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class Truc {
 
+    public static final Truc EMPTY = new Truc("", Collections.emptyList());
     private String name;
-    private Stopwatch stopwatch;
+    private List<Stopwatch> stopwatches;
 
-    private Truc(String name, Stopwatch stopwatch) {
+    private Truc(String name, List<Stopwatch> stopwatches) {
         this.name = name;
-        this.stopwatch = stopwatch;
+        this.stopwatches = stopwatches;
     }
 
     public static Truc of(final String name, final Stopwatch stopwatch) {
-        return new Truc(name, stopwatch);
+        return new Truc(name, Collections.singletonList(stopwatch));
     }
 
     public Truc append(Truc other){
-        return this; // TODO
+        return new Truc(this.name, ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
     }
 
     public long elapsed(final TimeUnit timeUnit) {
-        return stopwatch.elapsed(timeUnit);
+        return stopwatches.stream()
+                .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
+                .sum();
     }
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Truc truc = (Truc) o;
+        return Objects.equals(name, truc.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
+    @Override
+    public String toString() {
+        return "Truc{" +
+                "name='" + name + '\'' +
+                ", stopwatches size=" + stopwatches.size() +
+                '}';
     }
 }
