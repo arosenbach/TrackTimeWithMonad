@@ -4,10 +4,16 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
+import java.time.Duration;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
 
 public class Truc {
 
@@ -24,8 +30,9 @@ public class Truc {
         return new Truc(name, Collections.singletonList(stopwatch));
     }
 
-    public Truc append(Truc other){
-        return new Truc(this.name, ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
+    public Truc append(Truc other) {
+        return this.equals(EMPTY) ? other :
+                new Truc(this.name, ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
     }
 
     public long elapsed(final TimeUnit timeUnit) {
@@ -55,7 +62,7 @@ public class Truc {
     public String toString() {
         return "Truc{" +
                 "name='" + name + '\'' +
-                ", stopwatches size=" + stopwatches.size() +
+                ", stopwatches=" + stopwatches +
                 '}';
     }
 }
