@@ -21,7 +21,7 @@ class NamedStopwatchTest {
 
         @Test
         @DisplayName("provides the sum of n stopwatches")
-        public void sumOfStopwatches() {
+        void sumOfStopwatches() {
             final List<Stopwatch> stopwatches = Arrays.asList(Stopwatch.createStarted(),
                     Stopwatch.createStarted(),
                     Stopwatch.createStarted(),
@@ -47,7 +47,7 @@ class NamedStopwatchTest {
 
         @Test
         @DisplayName("equality by value")
-        public void equals() {
+        void equals() {
             final NamedStopwatch namedStopwatch1 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
             final NamedStopwatch namedStopwatch2 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
             assertEquals(namedStopwatch1, namedStopwatch2);
@@ -55,7 +55,7 @@ class NamedStopwatchTest {
 
         @Test
         @DisplayName("right identity: x <> mempty = x)")
-        public void rightIdentity() {
+        void rightIdentity() {
             final NamedStopwatch namedStopwatch1 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
             final NamedStopwatch namedStopwatch2 = namedStopwatch1.append(NamedStopwatch.EMPTY);
             assertEquals(namedStopwatch1, namedStopwatch2);
@@ -63,7 +63,7 @@ class NamedStopwatchTest {
 
         @Test
         @DisplayName("left identity: mempty <> x = x)")
-        public void lefttIdentity() {
+        void leftIdentity() {
             final NamedStopwatch namedStopwatch1 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
             final NamedStopwatch namedStopwatch2 = NamedStopwatch.EMPTY.append(namedStopwatch1);
             assertEquals(namedStopwatch1, namedStopwatch2);
@@ -71,7 +71,7 @@ class NamedStopwatchTest {
 
         @Test
         @DisplayName("associativity")
-        public void associativity() {
+        void associativity() {
             final NamedStopwatch namedStopwatch1 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
             final NamedStopwatch namedStopwatch2 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
             final NamedStopwatch namedStopwatch3 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
