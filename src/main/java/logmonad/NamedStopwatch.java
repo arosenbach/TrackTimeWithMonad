@@ -4,35 +4,31 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-import java.time.Duration;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
-public class Truc {
+public class NamedStopwatch {
 
-    public static final Truc EMPTY = new Truc("", Collections.emptyList());
+    public static final NamedStopwatch EMPTY = new NamedStopwatch("", Collections.emptyList());
     private String name;
     private List<Stopwatch> stopwatches;
 
-    private Truc(String name, List<Stopwatch> stopwatches) {
+    private NamedStopwatch(String name, List<Stopwatch> stopwatches) {
         this.name = name;
         this.stopwatches = stopwatches;
     }
 
-    public static Truc of(final String name, final Stopwatch stopwatch) {
-        return new Truc(name, Collections.singletonList(stopwatch));
+    public static NamedStopwatch of(final String name, final Stopwatch stopwatch) {
+        return new NamedStopwatch(name, Collections.singletonList(stopwatch));
     }
 
-    public Truc append(Truc other) {
+    public NamedStopwatch append(NamedStopwatch other) {
         return this.equals(EMPTY) ? other :
-                new Truc(this.name, ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
+                new NamedStopwatch(this.name, ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
     }
 
     public long elapsed(final TimeUnit timeUnit) {
@@ -49,8 +45,8 @@ public class Truc {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final Truc truc = (Truc) o;
-        return Objects.equals(name, truc.name);
+        final NamedStopwatch namedStopwatch = (NamedStopwatch) o;
+        return Objects.equals(name, namedStopwatch.name);
     }
 
     @Override
@@ -60,7 +56,7 @@ public class Truc {
 
     @Override
     public String toString() {
-        return "Truc{" +
+        return "NamedStopwatch{" +
                 "name='" + name + '\'' +
                 ", stopwatches=" + stopwatches +
                 '}';

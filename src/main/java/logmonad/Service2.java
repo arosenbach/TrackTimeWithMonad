@@ -2,7 +2,6 @@ package logmonad;
 
 import com.google.common.base.Stopwatch;
 
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 public class Service2 {
@@ -30,7 +29,7 @@ public class Service2 {
     private Timed<Class<Void>> privateStuff() {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.run();
-        return Timed.of(Void.TYPE, Truc.of("Service2::privateStuff", stopwatch));
+        return Timed.of(Void.TYPE, NamedStopwatch.of("Service2::privateStuff", stopwatch));
     }
 
 }

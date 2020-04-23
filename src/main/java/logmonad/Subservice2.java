@@ -9,11 +9,11 @@ public class Subservice2 {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.run();
         stopwatch.stop();
-        return Timed.of(42, Truc.of("Subservice::operation2",stopwatch));
+        return Timed.of(42, NamedStopwatch.of("Subservice::operation2",stopwatch));
     }
 
     public Timed<Integer> operation3(int param) {
-        Timed<Integer> result = Timed.of(param, Truc.of("operation3", Stopwatch.createStarted()));
+        Timed<Integer> result = Timed.of(param, NamedStopwatch.of("operation3", Stopwatch.createStarted()));
         final int randomInt = DoStuff.getRandomInt(10, 50);
         System.out.println(">>>>"+randomInt);
         for(int i = param; i< param+10; i++){
@@ -27,6 +27,6 @@ public class Subservice2 {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.run(randomInt);
         System.out.println(stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
-        return Timed.of(1, Truc.of("operation3 -> Subservice2::privateOperation",stopwatch));
+        return Timed.of(1, NamedStopwatch.of("operation3 -> Subservice2::privateOperation",stopwatch));
     }
 }

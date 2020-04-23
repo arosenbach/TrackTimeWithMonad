@@ -15,13 +15,13 @@ class TimedTest {
     @Test
     @DisplayName("Timed.of(a) >>= f(x)  ⇔  (Timed<> a) >>= f(x)  ⇔  f(a)")
     void test1() {
-        Timed.of(41, Truc.of("test1", Stopwatch.createStarted()))
+        Timed.of(41, NamedStopwatch.of("test1", Stopwatch.createStarted()))
                 .flatMap(this::tAdd1);
         assertTrue(true);
     }
 
     private Timed<Function<Integer, Integer>> tAdd1(final int integer) {
-        return Timed.of(add1, Truc.of("tAdd1", Stopwatch.createStarted()));
+        return Timed.of(add1, NamedStopwatch.of("tAdd1", Stopwatch.createStarted()));
     }
 
 

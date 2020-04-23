@@ -7,6 +7,6 @@ public class Subservice1 {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.run();
         stopwatch.stop();
-        return Timed.of("42", Truc.of("Subservice1:operation1",stopwatch));
+        return Timed.of("42", NamedStopwatch.of("Subservice1:operation1",stopwatch));
     }
 }

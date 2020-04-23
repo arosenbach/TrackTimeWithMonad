@@ -11,14 +11,14 @@ import java.util.function.Function;
 
 public class Timed<T> {
     private T value;
-    private List<Truc> stopwatches;
+    private List<NamedStopwatch> stopwatches;
 
-    private Timed(T value, final List<Truc> stopwatches) {
+    private Timed(T value, final List<NamedStopwatch> stopwatches) {
         this.value = value;
         this.stopwatches = ImmutableList.copyOf(stopwatches);
     }
 
-    public static <U> Timed<U> of(U value, final Truc stopwatch) {
+    public static <U> Timed<U> of(U value, final NamedStopwatch stopwatch) {
         return new Timed<>(value, Collections.singletonList(stopwatch));
     }
 
@@ -41,7 +41,7 @@ public class Timed<T> {
         return new Timed<>(append.apply(this.value, other.value), ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
     }
 
-    public List<Truc> getStopwatches() {
+    public List<NamedStopwatch> getStopwatches() {
         return this.stopwatches;
     }
 }
