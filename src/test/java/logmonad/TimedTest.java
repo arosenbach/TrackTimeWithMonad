@@ -34,7 +34,7 @@ class TimedTest {
     class Monoid {
 
         @Test
-        @DisplayName("right identity: m >>= unit = m)")
+        @DisplayName("right identity: m >>= unit ≡ m)")
         void rightIdentity() {
             final Timed<Integer> timedX = Timed.of(41, NamedStopwatch.of("timedx", Stopwatch.createStarted()));
 
@@ -43,7 +43,7 @@ class TimedTest {
         }
 
         @Test
-        @DisplayName("left identity: (unit x) >>= f = f x)")
+        @DisplayName("left identity: (unit x) >>= f ≡ f x)")
         void leftIdentity() {
             final NamedStopwatch namedStopwatch1 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
             final NamedStopwatch namedStopwatch2 = NamedStopwatch.EMPTY.append(namedStopwatch1);
@@ -51,12 +51,12 @@ class TimedTest {
         }
 
         @Test
-        @DisplayName("associativity")
+        @DisplayName("associativity (m >>= f) >>= g ≡ m >>= (x -> f x >>= g)")
         void associativity() {
-            final Timed<Integer> timedX = Timed.of(41, NamedStopwatch.of("timedx", Stopwatch.createStarted()));
+            final Timed<Integer> timedX = Timed.of(20, NamedStopwatch.of("timedx", Stopwatch.createStarted()));
 
-            final Function<Integer, Timed<Integer>> f = x ->  Timed.of(x + 1,  NamedStopwatch.of("x+1", Stopwatch.createStarted())) ;
-            final Function<Integer, Timed<Integer>> g = x ->  Timed.of(x * 2,  NamedStopwatch.of("x*2", Stopwatch.createStarted())) ;
+            final Function<Integer, Timed<Integer>> f = x ->  Timed.of(x * 2,  NamedStopwatch.of("x*2", Stopwatch.createStarted())) ;
+            final Function<Integer, Timed<Integer>> g = x ->  Timed.of(x + 1,  NamedStopwatch.of("x+1", Stopwatch.createStarted())) ;
 
             assertEquals((timedX.flatMap(g)).flatMap(f), timedX.flatMap(x -> g.apply(x).flatMap(f)));
             }

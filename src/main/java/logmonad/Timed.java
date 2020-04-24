@@ -1,22 +1,24 @@
 package logmonad;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Timed<T> {
     private T value;
-    private List<NamedStopwatch> stopwatches;
+    private Set<NamedStopwatch> stopwatches;
 
     private Timed(T value, final List<NamedStopwatch> stopwatches) {
         this.value = value;
-        this.stopwatches = ImmutableList.copyOf(stopwatches);
+        this.stopwatches = ImmutableSet.copyOf(stopwatches);
     }
 
     public static <U> Timed<U> of(U value, final NamedStopwatch stopwatch) {
@@ -47,7 +49,7 @@ public class Timed<T> {
         return new Timed<>(append.apply(this.value, other.value), ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
     }
 
-    public List<NamedStopwatch> getStopwatches() {
+    public Set<NamedStopwatch> getStopwatches() {
         return this.stopwatches;
     }
 
