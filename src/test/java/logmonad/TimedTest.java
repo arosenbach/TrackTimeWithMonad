@@ -33,29 +33,22 @@ class TimedTest {
     @DisplayName("is a monad")
     class Monoid {
 
-//        @Test
-//        @DisplayName("equality by value")
-//        void equals() {
-//            final NamedStopwatch namedStopwatch1 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
-//            final NamedStopwatch namedStopwatch2 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
-//            assertEquals(namedStopwatch1, namedStopwatch2);
-//        }
-//
-//        @Test
-//        @DisplayName("right identity: x <> mempty = x)")
-//        void rightIdentity() {
-//            final NamedStopwatch namedStopwatch1 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
-//            final NamedStopwatch namedStopwatch2 = namedStopwatch1.append(NamedStopwatch.EMPTY);
-//            assertEquals(namedStopwatch1, namedStopwatch2);
-//        }
-//
-//        @Test
-//        @DisplayName("left identity: mempty <> x = x)")
-//        void leftIdentity() {
-//            final NamedStopwatch namedStopwatch1 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
-//            final NamedStopwatch namedStopwatch2 = NamedStopwatch.EMPTY.append(namedStopwatch1);
-//            assertEquals(namedStopwatch1, namedStopwatch2);
-//        }
+        @Test
+        @DisplayName("right identity: m >>= unit = m)")
+        void rightIdentity() {
+            final Timed<Integer> timedX = Timed.of(41, NamedStopwatch.of("timedx", Stopwatch.createStarted()));
+
+            final Function<Integer, Timed<Integer>> unit = val -> Timed.of(val, NamedStopwatch.EMPTY);
+            assertEquals(timedX.flatMap(unit), timedX);
+        }
+
+        @Test
+        @DisplayName("left identity: (unit x) >>= f = f x)")
+        void leftIdentity() {
+            final NamedStopwatch namedStopwatch1 = NamedStopwatch.of("Acme", Stopwatch.createStarted());
+            final NamedStopwatch namedStopwatch2 = NamedStopwatch.EMPTY.append(namedStopwatch1);
+            assertEquals(namedStopwatch1, namedStopwatch2);
+        }
 
         @Test
         @DisplayName("associativity")

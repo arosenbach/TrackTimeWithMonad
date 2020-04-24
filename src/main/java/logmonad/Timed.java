@@ -39,7 +39,8 @@ public class Timed<T> {
 
     public <U> Timed<U> flatMap(Function<T, Timed<U>> mapper) {
         final Timed<U> mapped = mapper.apply(value);
-        return new Timed<>(mapped.value, ImmutableList.copyOf(Iterables.concat(stopwatches, mapped.stopwatches)));
+        final ImmutableList<NamedStopwatch> newStopwatches = ImmutableList.copyOf(Iterables.concat(this.stopwatches, mapped.stopwatches));
+        return new Timed<>(mapped.value, newStopwatches);
     }
 
     public <U> Timed<U> append(BiFunction<T, U, U> append, final Timed<U> other) {
@@ -62,5 +63,13 @@ public class Timed<T> {
     @Override
     public int hashCode() {
         return Objects.hash(value);
+    }
+
+    @Override
+    public String toString() {
+        return "Timed{" +
+                "value=" + value +
+                ", stopwatches=" + stopwatches +
+                '}';
     }
 }

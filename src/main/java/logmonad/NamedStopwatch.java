@@ -45,8 +45,8 @@ public class NamedStopwatch {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final NamedStopwatch namedStopwatch = (NamedStopwatch) o;
-        return Objects.equals(name, namedStopwatch.name);
+        final NamedStopwatch that = (NamedStopwatch) o;
+        return name.equals(that.name);
     }
 
     @Override
