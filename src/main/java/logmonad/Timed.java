@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -20,6 +21,10 @@ public class Timed<T> {
 
     public static <U> Timed<U> of(U value, final NamedStopwatch stopwatch) {
         return new Timed<>(value, Collections.singletonList(stopwatch));
+    }
+
+    public static <U> Timed<Function<U, U>> of(final Function<U, U> f) {
+        return new Timed<>(f, Collections.emptyList());
     }
 
     public T get() {
@@ -43,5 +48,19 @@ public class Timed<T> {
 
     public List<NamedStopwatch> getStopwatches() {
         return this.stopwatches;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Timed<?> timed = (Timed<?>) o;
+        return Objects.equals(value, timed.value) &&
+                Objects.equals(stopwatches, timed.stopwatches);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 }
