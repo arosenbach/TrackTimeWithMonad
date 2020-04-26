@@ -1,4 +1,4 @@
-package logmonad;
+package logmonad.util;
 
 public class DoStuff {
 

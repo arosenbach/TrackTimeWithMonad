@@ -1,32 +1,33 @@
-package logmonad;
+package logmonad.old;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
+import logmonad.NamedStopwatch;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toMap;
 
 public class Timed<T> {
     private T value;
-    private Set<NamedStopwatch> stopwatches;
+    private Map<String, NamedStopwatch> stopwatches;
 
-    private Timed(T value, final List<NamedStopwatch> stopwatches) {
+    private Timed(T value, final Map<String, NamedStopwatch> stopwatches) {
         this.value = value;
-        this.stopwatches = ImmutableSet.copyOf(stopwatches);
+        this.stopwatches = stopwatches;
     }
 
     public static <U> Timed<U> of(U value, final NamedStopwatch stopwatch) {
-        return new Timed<>(value, Collections.singletonList(stopwatch));
+        return new Timed<>(value, Collections.singletonMap(stopwatch.getName(), stopwatch));
     }
 
     public static <U> Timed<Function<U, U>> of(final Function<U, U> f) {
-        return new Timed<>(f, Collections.emptyList());
+        return new Timed<>(f, Collections.emptyMap());
     }
 
     public T get() {
@@ -34,23 +35,26 @@ public class Timed<T> {
     }
 
     public long elapsed(final TimeUnit timeUnit) {
-        return this.stopwatches.stream()
+        return this.stopwatches
+                .values()
+                .stream()
                 .mapToLong(s -> s.elapsed(timeUnit))
                 .sum();
     }
 
     public <U> Timed<U> flatMap(Function<T, Timed<U>> mapper) {
         final Timed<U> mapped = mapper.apply(value);
-        final ImmutableList<NamedStopwatch> newStopwatches = ImmutableList.copyOf(Iterables.concat(this.stopwatches, mapped.stopwatches));
-        return new Timed<>(mapped.value, newStopwatches);
+        final Map<String, NamedStopwatch> collect = Stream.concat(this.stopwatches.values().stream(), mapped.stopwatches.values().stream())
+                .collect(toMap(NamedStopwatch::getName, Function.identity(), NamedStopwatch::append));
+        return new Timed<>(mapped.value, collect);
     }
 
-    public <U> Timed<U> append(BiFunction<T, U, U> append, final Timed<U> other) {
-        return new Timed<>(append.apply(this.value, other.value), ImmutableList.copyOf(Iterables.concat(stopwatches, other.stopwatches)));
-    }
+//    public <U> Timed<U> append(BiFunction<T, U, U> append, final Timed<U> other) {
+//        return new Timed<>(append.apply(this.value, other.value), ImmutableList.copyOf(Iterables.concat(stopwatches.values(), other.stopwatches.values())));
+//    }
 
     public Set<NamedStopwatch> getStopwatches() {
-        return this.stopwatches;
+        return ImmutableSet.copyOf(this.stopwatches.values());
     }
 
     @Override

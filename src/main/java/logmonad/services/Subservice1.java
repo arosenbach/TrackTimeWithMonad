@@ -1,6 +1,9 @@
-package logmonad;
+package logmonad.services;
 
 import com.google.common.base.Stopwatch;
+import logmonad.NamedStopwatch;
+import logmonad.old.Timed;
+import logmonad.util.DoStuff;
 
 public class Subservice1 {
     public Timed<String> operation1(Class<Void> v) {

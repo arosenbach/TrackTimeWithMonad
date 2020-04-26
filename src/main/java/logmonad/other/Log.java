@@ -1,4 +1,4 @@
-package logmonad;
+package logmonad.other;
 
 import java.util.ArrayList;
 import java.util.Collections;

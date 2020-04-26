@@ -1,6 +1,7 @@
-package logmonad;
+package logmonad.services;
 
 import com.google.common.base.Stopwatch;
+import logmonad.other.Log;
 
 import java.util.concurrent.TimeUnit;
 

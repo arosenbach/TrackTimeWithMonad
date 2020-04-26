@@ -1,6 +1,9 @@
-package logmonad;
+package logmonad.services;
 
 import com.google.common.base.Stopwatch;
+import logmonad.NamedStopwatch;
+import logmonad.old.Timed;
+import logmonad.util.DoStuff;
 
 import java.util.concurrent.TimeUnit;
 
@@ -16,9 +19,9 @@ public class Subservice2 {
         Timed<Integer> result = Timed.of(param, NamedStopwatch.of("operation3", Stopwatch.createStarted()));
         final int randomInt = DoStuff.getRandomInt(10, 50);
         System.out.println(">>>>"+randomInt);
-        for(int i = param; i< param+10; i++){
-            result = result.append(Integer::sum, privateOperation(i, randomInt));
-        }
+//        for(int i = param; i< param+10; i++){
+//            result = result.append(Integer::sum, privateOperation(i, randomInt));
+//        }
         return result;
     }
 
