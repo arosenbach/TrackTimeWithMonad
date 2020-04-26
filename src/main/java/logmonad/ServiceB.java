@@ -2,6 +2,7 @@ package logmonad;
 
 import logmonad.example.Record;
 import logmonad.util.DoStuff;
+import logmonad.util.ListFunction;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,8 +23,7 @@ public class ServiceB {
 
         Timed<List<Record>> result = Timed.empty(Collections.emptyList());
         for (String id : ids) {
-            final Timed<Record> record = getRecord(id);
-            result = result.append(record, (res, rec) -> Stream.concat(res.stream(), Stream.of(rec)).collect(toList()));
+            result = result.append(getRecord(id), ListFunction::add);
         }
         return result;
 
