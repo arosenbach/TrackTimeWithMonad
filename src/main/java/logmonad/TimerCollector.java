@@ -1,22 +1,18 @@
 package logmonad;
 
+import logmonad.util.ListFunction;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public class TimerCollector {
-//Monoid
-
-    //Map<String, List<Long>> { "name" -> [25,34] }
 
     final private Map<String, List<Long>> timers;
-
 
     private TimerCollector(final Map<String, List<Long>> timers) {
         this.timers = timers;
@@ -36,12 +32,8 @@ public class TimerCollector {
                         .collect(
                                 toMap(Map.Entry::getKey,
                                         Map.Entry::getValue,
-                                        this::concatList));
+                                        ListFunction::concat));
         return new TimerCollector(newTimers);
-    }
-
-    private <U> List<U> concatList(final List<U> listA, final List<U> listB) {
-        return Stream.concat(listA.stream(), listB.stream()).collect(toList());
     }
 
 
@@ -53,11 +45,11 @@ public class TimerCollector {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final TimerCollector that = (TimerCollector) o;
-        return Objects.equals(timers, that.timers);
+    public boolean equals(final Object runnable) {
+        if (this == runnable) return true;
+        if (runnable == null || getClass() != runnable.getClass()) return false;
+        final TimerCollector that = (TimerCollector) runnable;
+        return Objects.equals(timers.keySet(), that.timers.keySet());
     }
 
     @Override

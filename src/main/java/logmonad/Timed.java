@@ -1,6 +1,7 @@
 package logmonad;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -27,15 +28,9 @@ public class Timed<A> {
         return new Timed<>(logs.append(mappedTimed.logs), mappedTimed.value);
     }
 
-    public <U> Timed<U> append(final TimerCollector timerCollector, U value) {
-        return Timed.of(this.logs.append(timerCollector), value);
-    }
-
     public <B> Timed<A> append(final Timed<B> other, BiFunction<A,B,A> mergeFunction) {
         return Timed.of(this.logs.append(other.logs), mergeFunction.apply(value, other.value));
     }
-
-
 
     public A getValue() {
         return value;
@@ -47,6 +42,23 @@ public class Timed<A> {
 
     @Override
     public String toString() {
-        return "Writer("+logs+", "+value+")";
+        return "Timed{" +
+                "logs=" + logs +
+                ", value=" + value +
+                '}';
+    }
+
+    @Override
+    public boolean equals(final Object runnable) {
+        if (this == runnable) return true;
+        if (runnable == null || getClass() != runnable.getClass()) return false;
+        final Timed<?> timed = (Timed<?>) runnable;
+        return Objects.equals(logs, timed.logs) &&
+                Objects.equals(value, timed.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(logs, value);
     }
 }

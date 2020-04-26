@@ -3,7 +3,7 @@ package logmonad.util;
 public class DoStuff {
 
     public static void run() {
-        run(getRandomInt(10,500));
+        run(Random.getRandomInt(10,500));
     }
 
     public static void run(final int randomInt) {
@@ -14,7 +14,4 @@ public class DoStuff {
         }
     }
 
-    public static int getRandomInt(int min, int max) {
-        return min + (int) (Math.random() * ((max - min) + 1));
-    }
 }
