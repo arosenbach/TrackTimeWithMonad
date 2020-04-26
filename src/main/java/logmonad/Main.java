@@ -1,22 +1,35 @@
 package logmonad;
 
+import logmonad.example.Record;
+import logmonad.util.DoStuff;
+
+import java.util.List;
+
 import static java.util.stream.Collectors.toMap;
 
 public class Main {
-    public static void main(String... args){
-//        final Service service = new Service();
-//        service.run();
+    public static void main(String... args) {
+        final ServiceA serviceA = new ServiceA();
+        final ServiceB serviceB = new ServiceB();
 
-//        final Service2 service2 = new Service2(new Subservice1(), new Subservice2());
-//        service2.run();
+        final Timed<List<Record>> timed = checkAuthentication()
+                .flatMap(serviceA::getIds)
+                .flatMap(serviceB::getRecords);
+//                .flatMap(serviceB::operation3);
+        System.out.println(timed);
+        System.out.println("getRecord total -> " + timed.getTimes("getRecord").stream().mapToLong(Long::longValue).sum() + "ms");
+        System.out.println("getRecord average -> " + timed.getTimes("getRecord").stream().mapToLong(Long::longValue).average().getAsDouble() + "ms");
 
-        final Writer<String> writer = Writer.of(TimerCollector.of("method1", 23), 42)
-                .flatMap(Main::add1)
-                .flatMap(Main::loop5);
-        System.out.println(writer);
     }
 
-    private static  Writer<String> loop5(final String s) {
+    public static Timed<Class<Void>> checkAuthentication() {
+        final long startTime = System.nanoTime();
+        DoStuff.run();
+        final long endTime = System.nanoTime();
+        return Timed.of(TimerCollector.of("checkAuthentication", endTime - startTime), Void.TYPE);
+    }
+
+    private static Timed<String> loop5(final String s) {
 //        TimerCollector timerCollector = TimerCollector.empty();
 //        final StringBuilder result = new StringBuilder();
 //        for(int i = 0; i < 5;i++){
@@ -24,16 +37,16 @@ public class Main {
 //            result.append(i);
 //        }
 //        return Writer.of(timerCollector,result.toString());
-        Writer<String> result = Writer.empty("");
-        for(int i = 0; i < 5;i++){
+        Timed<String> result = Timed.empty("");
+        for (int i = 0; i < 5; i++) {
             result = result.append(TimerCollector.of("loop5", i), result.getValue() + i);
         }
         return result;
     }
 
-    private static Writer<String> add1(final Integer integer) {
+    private static Timed<String> add1(final Integer integer) {
         final TimerCollector time = TimerCollector.of("add1", 342);
-        return Writer.of(time,integer+1+"");
+        return Timed.of(time, integer + 1 + "");
     }
 
 

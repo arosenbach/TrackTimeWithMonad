@@ -1,7 +1,6 @@
 package logmonad.old;
 
 import com.google.common.collect.ImmutableSet;
-import logmonad.NamedStopwatch;
 
 import java.util.Collections;
 import java.util.Map;

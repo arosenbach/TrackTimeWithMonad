@@ -1,4 +1,4 @@
-package logmonad;
+package logmonad.old;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;

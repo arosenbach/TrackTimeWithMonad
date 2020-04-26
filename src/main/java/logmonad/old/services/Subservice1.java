@@ -1,7 +1,7 @@
-package logmonad.services;
+package logmonad.old.services;
 
 import com.google.common.base.Stopwatch;
-import logmonad.NamedStopwatch;
+import logmonad.old.NamedStopwatch;
 import logmonad.old.Timed;
 import logmonad.util.DoStuff;
 
