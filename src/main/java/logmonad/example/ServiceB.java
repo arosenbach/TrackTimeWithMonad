@@ -1,14 +1,13 @@
 package logmonad.example;
 
+import com.google.common.base.Stopwatch;
 import logmonad.Timed;
 import logmonad.TimerCollector;
-import logmonad.example.User;
 import logmonad.util.DoStuff;
 import logmonad.util.ListFunction;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toList;
 
@@ -29,19 +28,19 @@ public class ServiceB {
     }
 
     public Timed<User> getUser(final String userId) {
-        final long startTime = System.nanoTime();
+        final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.run();
-        final long endTime = System.nanoTime();
+        stopwatch.stop();
         return Timed.of(
-                TimerCollector.of("getUser", endTime - startTime),
+                TimerCollector.of("getUser", stopwatch),
                 new User(userId));
     }
 
     public Timed<List<User>> filterAdults(final List<User> users) {
-        final long startTime = System.nanoTime();
+        final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.run();
-        final long endTime = System.nanoTime();
-        return Timed.of(TimerCollector.of("filterAdults", endTime - startTime),
+        stopwatch.stop();
+        return Timed.of(TimerCollector.of("filterAdults", stopwatch),
                 users.stream().filter(User::isAdult).collect(toList()));
     }
 

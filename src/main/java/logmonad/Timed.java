@@ -1,5 +1,7 @@
 package logmonad;
 
+import com.google.common.base.Stopwatch;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -36,7 +38,7 @@ public class Timed<A> {
         return value;
     }
 
-    public List<Long> getTimes(String name){
+    public List<Stopwatch> getTimes(String name){
         return logs.get(name);
     }
 

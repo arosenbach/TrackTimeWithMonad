@@ -1,10 +1,12 @@
 package logmonad.example;
 
+import com.google.common.base.Stopwatch;
 import logmonad.Timed;
 import logmonad.TimerCollector;
 import logmonad.util.DoStuff;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String... args) {
@@ -17,24 +19,27 @@ public class Main {
                 .flatMap(serviceB::filterAdults);
 
         System.out.println(adultUsers);
-        System.out.println("getUser total -> " + adultUsers.getTimes("getUser").stream().mapToLong(Long::longValue).sum() + "ms");
+        System.out.println("getUser total -> " + adultUsers.getTimes("getUser")
+                .stream()
+                .mapToLong(stopwatch -> stopwatch.elapsed(TimeUnit.MILLISECONDS))
+                .sum() + " ms");
 
         System.out.println(adultUsers.getValue());
 
         adultUsers.getTimes("getUser")
                 .stream()
-                .mapToLong(Long::longValue)
+                .mapToLong(stopwatch -> stopwatch.elapsed(TimeUnit.MILLISECONDS))
                 .average()
-                .ifPresent(avg -> System.out.println("getUser average -> " + avg + "ms"));
+                .ifPresent(avg -> System.out.println("getUser average -> " + avg + " ms"));
 
 
     }
 
     private static Timed<Class<Void>> checkAuthentication() {
-        final long startTime = System.nanoTime();
+        final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.run();
-        final long endTime = System.nanoTime();
-        return Timed.of(TimerCollector.of("checkAuthentication", endTime - startTime), Void.TYPE);
+        stopwatch.stop();
+        return Timed.of(TimerCollector.of("checkAuthentication", stopwatch), Void.TYPE);
     }
 
 }

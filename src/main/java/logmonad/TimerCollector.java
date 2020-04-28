@@ -1,25 +1,27 @@
 package logmonad;
 
+import com.google.common.base.Stopwatch;
 import logmonad.util.ListFunction;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
 
 public class TimerCollector {
 
-    final private Map<String, List<Long>> timers;
+    final private Map<String, List<Stopwatch>> stopwatches;
 
-    private TimerCollector(final Map<String, List<Long>> timers) {
-        this.timers = timers;
+    private TimerCollector(final Map<String, List<Stopwatch>> stopwatches) {
+        this.stopwatches = stopwatches;
     }
 
-    public static TimerCollector of(final String timerName, final long timers) {
-        return new TimerCollector(Collections.singletonMap(timerName, Collections.singletonList(timers)));
+    public static TimerCollector of(final String timerName, final Stopwatch stopwatch) {
+        return new TimerCollector(Collections.singletonMap(timerName, Collections.singletonList(stopwatch)));
     }
 
     public static TimerCollector empty() {
@@ -27,8 +29,8 @@ public class TimerCollector {
     }
 
     public TimerCollector append(final TimerCollector other) {
-        final Map<String, List<Long>> newTimers =
-                Stream.concat(timers.entrySet().stream(), other.timers.entrySet().stream())
+        final Map<String, List<Stopwatch>> newTimers =
+                Stream.concat(stopwatches.entrySet().stream(), other.stopwatches.entrySet().stream())
                         .collect(
                                 toMap(Map.Entry::getKey,
                                         Map.Entry::getValue,
@@ -40,7 +42,7 @@ public class TimerCollector {
     @Override
     public String toString() {
         return "TimerCollector{" +
-                "timers=" + timers +
+                "stopwatches=" + stopwatches +
                 '}';
     }
 
@@ -49,15 +51,22 @@ public class TimerCollector {
         if (this == runnable) return true;
         if (runnable == null || getClass() != runnable.getClass()) return false;
         final TimerCollector that = (TimerCollector) runnable;
-        return Objects.equals(timers.keySet(), that.timers.keySet());
+        return Objects.equals(stopwatches.keySet(), that.stopwatches.keySet());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(timers);
+        return Objects.hash(stopwatches);
     }
 
-    public List<Long> get(final String name) {
-        return timers.getOrDefault(name, Collections.emptyList());
+    public List<Stopwatch> get(final String name) {
+        return stopwatches.getOrDefault(name, Collections.emptyList());
+    }
+
+    public long elapsed(final String name, final TimeUnit timeUnit) {
+        return get(name)
+                .stream()
+                .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
+                .sum();
     }
 }
