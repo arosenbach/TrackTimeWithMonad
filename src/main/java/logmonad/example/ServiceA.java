@@ -22,7 +22,7 @@ public class ServiceA {
         final List<String> userIds = IntStream.range(Random.getRandomInt(10, 15), Random.getRandomInt(25, 35))
                 .boxed().map(n -> "user" + n)
                 .collect(toList());
-        return Timed.of(TimerCollector.of("getUserIds", stopwatch), userIds);
+        return Timed.of(userIds, TimerCollector.of("getUserIds", stopwatch));
     }
 
 }

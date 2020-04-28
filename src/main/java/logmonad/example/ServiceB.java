@@ -32,16 +32,16 @@ public class ServiceB {
         DoStuff.run();
         stopwatch.stop();
         return Timed.of(
-                TimerCollector.of("getUser", stopwatch),
-                new User(userId));
+                new User(userId), TimerCollector.of("getUser", stopwatch)
+        );
     }
 
     public Timed<List<User>> filterAdults(final List<User> users) {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.run();
         stopwatch.stop();
-        return Timed.of(TimerCollector.of("filterAdults", stopwatch),
-                users.stream().filter(User::isAdult).collect(toList()));
+        return Timed.of(users.stream().filter(User::isAdult).collect(toList()), TimerCollector.of("filterAdults", stopwatch)
+        );
     }
 
 }

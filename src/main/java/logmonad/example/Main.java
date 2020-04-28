@@ -19,14 +19,14 @@ public class Main {
                 .flatMap(serviceB::filterAdults);
 
         System.out.println(adultUsers);
-        System.out.println("getUser total -> " + adultUsers.getTimes("getUser")
+        System.out.println("getUser total -> " + adultUsers.getStopwatches("getUser")
                 .stream()
                 .mapToLong(stopwatch -> stopwatch.elapsed(TimeUnit.MILLISECONDS))
                 .sum() + " ms");
 
         System.out.println(adultUsers.getValue());
 
-        adultUsers.getTimes("getUser")
+        adultUsers.getStopwatches("getUser")
                 .stream()
                 .mapToLong(stopwatch -> stopwatch.elapsed(TimeUnit.MILLISECONDS))
                 .average()
@@ -39,7 +39,7 @@ public class Main {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.run();
         stopwatch.stop();
-        return Timed.of(TimerCollector.of("checkAuthentication", stopwatch), Void.TYPE);
+        return Timed.of(Void.TYPE, TimerCollector.of("checkAuthentication", stopwatch));
     }
 
 }

@@ -9,43 +9,43 @@ import java.util.function.Function;
 
 public class Timed<A> {
 
-    private TimerCollector logs;
+    private TimerCollector timerCollector;
     private A value;
 
-    private Timed(TimerCollector logs, A value) {
-        this.logs = logs;
+    private Timed(A value, TimerCollector timerCollector) {
+        this.timerCollector = timerCollector;
         this.value = value;
     }
 
-    public static <A> Timed<A> of(TimerCollector log, A value) {
-        return new Timed<>(log, value);
+    public static <A> Timed<A> of(A value, TimerCollector timerCollector) {
+        return new Timed<>(value, timerCollector);
     }
 
     public static <A> Timed<A> empty(A emptyValue) {
-        return new Timed<>(TimerCollector.empty(), emptyValue);
+        return new Timed<>(emptyValue, TimerCollector.empty());
     }
 
     public <B> Timed<B> flatMap(Function<A, Timed<B>> f) {
         Timed<B> mappedTimed = f.apply(value);
-        return new Timed<>(logs.append(mappedTimed.logs), mappedTimed.value);
+        return new Timed<>(mappedTimed.value, timerCollector.append(mappedTimed.timerCollector));
     }
 
     public <B> Timed<A> append(final Timed<B> other, BiFunction<A,B,A> mergeFunction) {
-        return Timed.of(this.logs.append(other.logs), mergeFunction.apply(value, other.value));
+        return Timed.of(mergeFunction.apply(value, other.value), this.timerCollector.append(other.timerCollector));
     }
 
     public A getValue() {
         return value;
     }
 
-    public List<Stopwatch> getTimes(String name){
-        return logs.get(name);
+    public List<Stopwatch> getStopwatches(String name){
+        return timerCollector.get(name);
     }
 
     @Override
     public String toString() {
         return "Timed{" +
-                "logs=" + logs +
+                "timerCollector=" + timerCollector +
                 ", value=" + value +
                 '}';
     }
@@ -55,12 +55,12 @@ public class Timed<A> {
         if (this == runnable) return true;
         if (runnable == null || getClass() != runnable.getClass()) return false;
         final Timed<?> timed = (Timed<?>) runnable;
-        return Objects.equals(logs, timed.logs) &&
+        return Objects.equals(timerCollector, timed.timerCollector) &&
                 Objects.equals(value, timed.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(logs, value);
+        return Objects.hash(timerCollector, value);
     }
 }
