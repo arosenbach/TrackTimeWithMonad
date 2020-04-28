@@ -5,12 +5,14 @@ import logmonad.Timed;
 import logmonad.TimerCollector;
 import logmonad.util.DoStuff;
 import logmonad.util.ListFunction;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
+@Component
 public class ServiceB {
     public Timed<List<User>> getUsers(final List<String> ids) {
         return ids.stream()

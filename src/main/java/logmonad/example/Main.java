@@ -3,15 +3,22 @@ package logmonad.example;
 import com.google.common.base.Stopwatch;
 import logmonad.Timed;
 import logmonad.TimerCollector;
+import logmonad.aspect.AppConfig;
 import logmonad.util.DoStuff;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String... args) {
-        final ServiceA serviceA = new ServiceA();
-        final ServiceB serviceB = new ServiceB();
+
+        final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+        ctx.register(AppConfig.class);
+        ctx.refresh();
+
+        final ServiceA serviceA = ctx.getBean(ServiceA.class);
+        final ServiceB serviceB = ctx.getBean(ServiceB.class);
 
         final Timed<List<User>> adultUsers = checkAuthentication()
                 .flatMap(serviceA::getUserIds)
@@ -31,6 +38,9 @@ public class Main {
                 .mapToLong(stopwatch -> stopwatch.elapsed(TimeUnit.MILLISECONDS))
                 .average()
                 .ifPresent(avg -> System.out.println("getUser average -> " + avg + " ms"));
+
+        final List<String> userIds = serviceA.getUserIds();
+        System.out.println(userIds);
 
 
     }
