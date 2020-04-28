@@ -19,6 +19,8 @@ public class Main {
         System.out.println(adultUsers);
         System.out.println("getUser total -> " + adultUsers.getTimes("getUser").stream().mapToLong(Long::longValue).sum() + "ms");
 
+        System.out.println(adultUsers.getValue());
+
         adultUsers.getTimes("getUser")
                 .stream()
                 .mapToLong(Long::longValue)

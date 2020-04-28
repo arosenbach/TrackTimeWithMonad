@@ -23,7 +23,7 @@ public class ServiceB {
         /* This does the same, using a for-loop */
 //        Timed<List<Record>> result = Timed.empty(Collections.emptyList());
 //        for (String id : ids) {
-//            result = result.append(getRecord(id), ListFunction::add);
+//            result = result.append(getUser(id), ListFunction::add);
 //        }
 //        return result;
     }
@@ -45,11 +45,4 @@ public class ServiceB {
                 users.stream().filter(User::isAdult).collect(toList()));
     }
 
-    public Timed<List<User>> filterChildren(final List<User> users) {
-        final long startTime = System.nanoTime();
-        DoStuff.run();
-        final long endTime = System.nanoTime();
-        return Timed.of(TimerCollector.of("filterChildren", endTime - startTime),
-                users.stream().filter(Predicate.not(User::isAdult)).collect(toList()));
-    }
 }
