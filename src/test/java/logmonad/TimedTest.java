@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -92,6 +94,8 @@ class TimedTest {
     @DisplayName("Timed::trackTime")
     class TrackTimeMethod {
 
+        public static final String STOPWATCH_NAME = "aName";
+
         private int returns42In300ms() {
             try {
                 Thread.sleep(300);
@@ -109,19 +113,59 @@ class TimedTest {
                 e.printStackTrace();
             }
             stopwatch.stop();
-            return Timed.of(42, TimerCollector.of("supplier", stopwatch));
+            return Timed.of(42, TimerCollector.of(STOPWATCH_NAME, stopwatch));
         }
 
         @Test
         @DisplayName("Timed.trackTime transforms a Suplier<T> into of Supplier<Timed<T>>")
         void supplier() {
-            final Timed<Integer> actual = Timed.trackTime("supplier", this::returns42In300ms).get();
+            final Timed<Integer> actual = Timed.trackTime("aName", (Supplier<Integer>) this::returns42In300ms).get();
             final Timed<Integer> expected = this.returnsTimed42In300ms();
             assertEquals(actual, expected);
-            assertEquals(roundedElapsedInMillis("supplier", actual),
-                    roundedElapsedInMillis("supplier", expected));
+            assertEquals(roundedElapsedInMillis("aName", actual),
+                    roundedElapsedInMillis("aName", expected));
 
         }
+
+
+        private int returns42In300ms(final int x) {
+            return returns42In300ms();
+        }
+
+        private Timed<Integer> returnsTimed42In300ms(final int i) {
+            return returnsTimed42In300ms();
+        }
+
+        @Test
+        @DisplayName("Timed.trackTime transforms a Function<A,T> into of Function<A,<Timed<T>>")
+        void function() {
+            final Timed<Integer> actual = Timed.trackTime("aName", (Function<Integer, Integer>) this::returns42In300ms).apply(42);
+            final Timed<Integer> expected = this.returnsTimed42In300ms(42);
+            assertEquals(actual, expected);
+            assertEquals(roundedElapsedInMillis("aName", actual),
+                    roundedElapsedInMillis("aName", expected));
+
+        }
+
+        private int returns42In300ms(final int x, final int y) {
+            return returns42In300ms();
+        }
+
+        private Timed<Integer> returnsTimed42In300ms(final int x, final int y) {
+            return returnsTimed42In300ms();
+        }
+
+        @Test
+        @DisplayName("Timed.trackTime transforms a BiFunction<A,B,T> into of BiFunction<A,B,<Timed<T>>")
+        void biFunction() {
+            final Timed<Integer> actual = Timed.trackTime("aName", (BiFunction<Integer, Integer, Integer>) this::returns42In300ms).apply(42, 42);
+            final Timed<Integer> expected = this.returnsTimed42In300ms(42, 42);
+            assertEquals(actual, expected);
+            assertEquals(roundedElapsedInMillis("aName", actual),
+                    roundedElapsedInMillis("aName", expected));
+
+        }
+
 
         private String roundedElapsedInMillis(final String name, final Timed<Integer> timed1) {
             return new DecimalFormat("0.0").format(timed1.getStopwatches(name).stream().mapToLong(s -> s.elapsed(TimeUnit.MILLISECONDS)).sum() / 1000F);
