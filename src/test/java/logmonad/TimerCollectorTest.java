@@ -77,10 +77,5 @@ class TimerCollectorTest {
             final TimerCollector namedStopwatch3 = TimerCollector.of("Acme", Stopwatch.createStarted());
             assertEquals((namedStopwatch1.append(namedStopwatch2)).append(namedStopwatch3), namedStopwatch1.append((namedStopwatch2).append(namedStopwatch3)));
         }
-
-        @Test
-        void testCI(){
-            assertTrue(false);
-        }
     }
 }
