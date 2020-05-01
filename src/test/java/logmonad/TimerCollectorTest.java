@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @DisplayName("TimerCollector")
@@ -75,6 +76,11 @@ class TimerCollectorTest {
             final TimerCollector namedStopwatch2 = TimerCollector.of("Acme2", Stopwatch.createStarted());
             final TimerCollector namedStopwatch3 = TimerCollector.of("Acme", Stopwatch.createStarted());
             assertEquals((namedStopwatch1.append(namedStopwatch2)).append(namedStopwatch3), namedStopwatch1.append((namedStopwatch2).append(namedStopwatch3)));
+        }
+
+        @Test
+        void testCI(){
+            assertTrue(false);
         }
     }
 }
