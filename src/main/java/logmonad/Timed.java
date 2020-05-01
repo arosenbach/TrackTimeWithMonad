@@ -26,7 +26,7 @@ public class Timed<A> {
         return new Timed<>(emptyValue, TimerCollector.empty());
     }
 
-    public static <A, B> Function<A, Timed<B>> lift(final String name, final Function<A, B> function) {
+    public static <A, B> Function<A, Timed<B>> trackTime(final String name, final Function<A, B> function) {
         return (x) -> {
             final Stopwatch stopwatch = Stopwatch.createStarted();
             final B value = function.apply(x);
@@ -35,7 +35,7 @@ public class Timed<A> {
         };
     }
 
-    public static <A, B, C> BiFunction<A, B, Timed<C>> lift(final String name, final BiFunction<A, B, C> biFunction) {
+    public static <A, B, C> BiFunction<A, B, Timed<C>> trackTime(final String name, final BiFunction<A, B, C> biFunction) {
         return (arg1, arg2) -> {
             final Stopwatch stopwatch = Stopwatch.createStarted();
             final C value = biFunction.apply(arg1, arg2);
@@ -44,7 +44,7 @@ public class Timed<A> {
         };
     }
 
-    public static <A> Supplier<Timed<A>> lift(final String name, final Supplier<A> supplier) {
+    public static <A> Supplier<Timed<A>> trackTime(final String name, final Supplier<A> supplier) {
         return () -> {
             final Stopwatch stopwatch = Stopwatch.createStarted();
             final A value = supplier.get();

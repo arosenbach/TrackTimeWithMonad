@@ -14,7 +14,7 @@ public class Main {
         final ServiceB serviceB = new ServiceB();
 
         final Timed<List<User>> adultUsers = checkAuthentication()
-                .flatMap(Timed.lift("ServiceA::getUserIds", serviceA::getUserIds))
+                .flatMap(Timed.trackTime("ServiceA::getUserIds", serviceA::getUserIds))
                 .flatMap(serviceB::getUsers)
                 .flatMap(serviceB::filterAdults);
 

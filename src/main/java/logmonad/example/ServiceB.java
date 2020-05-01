@@ -14,7 +14,7 @@ import static java.util.stream.Collectors.toList;
 public class ServiceB {
     public Timed<List<User>> getUsers(final List<String> ids) {
         return ids.stream()
-                .map(Timed.lift("getUser", this::getUser))
+                .map(Timed.trackTime("getUser", this::getUser))
                 .reduce(Timed.empty(Collections.emptyList()),
                         (acc, next) -> acc.append(next, ListFunction::add),
                         (timedListA, timedListB) -> timedListA.append(timedListB, ListFunction::concat));
