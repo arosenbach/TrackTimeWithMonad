@@ -36,9 +36,9 @@ public class Timed<A> {
     }
 
     public static <A, B> Function<A, Timed<B>> trackTime(final String name, final Function<A, B> function) {
-        return (x) -> {
+        return (arg) -> {
             final Stopwatch stopwatch = Stopwatch.createStarted();
-            final B value = function.apply(x);
+            final B value = function.apply(arg);
             stopwatch.stop();
             return Timed.of(value, TimerCollector.of(name, stopwatch));
         };

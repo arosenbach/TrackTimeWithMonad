@@ -37,15 +37,6 @@ public class ServiceB {
         return new User(userId);
     }
 
-//    public Timed<User> getUser(final String userId) {
-//        final Stopwatch stopwatch = Stopwatch.createStarted();
-//        DoStuff.run();
-//        stopwatch.stop();
-//        return Timed.of(
-//                new User(userId), TimerCollector.of("getUser", stopwatch)
-//        );
-//    }
-
     public Timed<List<User>> filterAdults(final List<User> users) {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.sleep();
