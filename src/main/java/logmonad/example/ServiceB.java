@@ -3,8 +3,8 @@ package logmonad.example;
 import com.google.common.base.Stopwatch;
 import logmonad.Timed;
 import logmonad.TimerCollector;
-import logmonad.util.DoStuff;
-import logmonad.util.ListFunction;
+import logmonad.example.util.DoStuff;
+import logmonad.example.util.ListFunction;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +17,7 @@ public class ServiceB {
                 .map(Timed.trackTime("getUser", this::getUser))
                 .reduce(Timed.empty(Collections.emptyList()),
                         (acc, next) -> acc.append(next, ListFunction::add),
-                        (timedListA, timedListB) -> timedListA.append(timedListB, ListFunction::concat));
+                        (timedListA, timedListB) -> timedListA.append(timedListB, ListFunction::concatenateLists));
 
         /* This does the same, using a for-loop */
 //        Timed<List<Record>> result = Timed.empty(Collections.emptyList());
@@ -28,7 +28,7 @@ public class ServiceB {
     }
 
     public User getUser(final String userId) {
-        DoStuff.run();
+        DoStuff.sleep();
         return new User(userId);
     }
 
@@ -43,7 +43,7 @@ public class ServiceB {
 
     public Timed<List<User>> filterAdults(final List<User> users) {
         final Stopwatch stopwatch = Stopwatch.createStarted();
-        DoStuff.run();
+        DoStuff.sleep();
         stopwatch.stop();
         return Timed.of(users.stream().filter(User::isAdult).collect(toList()), TimerCollector.of("filterAdults", stopwatch)
         );

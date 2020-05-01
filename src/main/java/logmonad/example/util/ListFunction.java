@@ -1,4 +1,4 @@
-package logmonad.util;
+package logmonad.example.util;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -11,7 +11,5 @@ public class ListFunction {
         return Stream.concat(list.stream(), Stream.of(element)).collect(toList());
     }
 
-    public static <T> List<T> concat(List<T> listA, List<T> listB) {
-        return Stream.concat(listA.stream(), listB.stream()).collect(toList());
-    }
+
 }

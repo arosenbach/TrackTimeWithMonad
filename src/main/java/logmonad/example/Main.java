@@ -3,7 +3,7 @@ package logmonad.example;
 import com.google.common.base.Stopwatch;
 import logmonad.Timed;
 import logmonad.TimerCollector;
-import logmonad.util.DoStuff;
+import logmonad.example.util.DoStuff;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +37,7 @@ public class Main {
 
     private static Timed<Class<Void>> checkAuthentication() {
         final Stopwatch stopwatch = Stopwatch.createStarted();
-        DoStuff.run();
+        DoStuff.sleep();
         stopwatch.stop();
         return Timed.of(Void.TYPE, TimerCollector.of("checkAuthentication", stopwatch));
     }

@@ -1,7 +1,6 @@
 package logmonad;
 
 import com.google.common.base.Stopwatch;
-import logmonad.util.ListFunction;
 
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +9,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public class TimerCollector {
@@ -34,10 +34,13 @@ public class TimerCollector {
                         .collect(
                                 toMap(Map.Entry::getKey,
                                         Map.Entry::getValue,
-                                        ListFunction::concat));
+                                        this::concatenateLists));
         return new TimerCollector(newTimers);
     }
 
+    private <T> List<T> concatenateLists(List<T> listA, List<T> listB) {
+        return Stream.concat(listA.stream(), listB.stream()).collect(toList());
+    }
 
     @Override
     public String toString() {
