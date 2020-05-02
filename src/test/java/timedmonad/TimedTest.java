@@ -1,4 +1,4 @@
-package logmonad;
+package timedmonad;
 
 import com.google.common.base.Stopwatch;
 import org.junit.jupiter.api.DisplayName;
@@ -19,8 +19,8 @@ class TimedTest {
     @Test
     @DisplayName("is equal by value")
     void equals() {
-        final Timed<Integer> timedX = Timed.of(41, TimerCollector.of("timedX", Stopwatch.createStarted()));
-        final Timed<Integer> timedY = Timed.of(41, TimerCollector.of("timedX", Stopwatch.createStarted()));
+        final Timed<Integer> timedX = Timed.of(41, Timed.NamedStopwatch.of("timedX", Stopwatch.createStarted()));
+        final Timed<Integer> timedY = Timed.of(41, Timed.NamedStopwatch.of("timedX", Stopwatch.createStarted()));
         assertEquals(timedX, timedY);
     }
 
@@ -31,7 +31,7 @@ class TimedTest {
         @Test
         @DisplayName("right identity: x <> mempty = x)")
         void rightIdentity() {
-            final Timed<Integer> timedX = Timed.of(41, TimerCollector.of("timedX", Stopwatch.createStarted()));
+            final Timed<Integer> timedX = Timed.of(41, Timed.NamedStopwatch.of("timedX", Stopwatch.createStarted()));
             final Timed<Integer> timedY = timedX.append(Timed.empty(0), Integer::sum);
             assertEquals(timedX, timedY);
         }
@@ -39,7 +39,7 @@ class TimedTest {
         @Test
         @DisplayName("left identity: mempty <> x = x)")
         void leftIdentity() {
-            final Timed<Integer> timedX = Timed.of(41, TimerCollector.of("timedX", Stopwatch.createStarted()));
+            final Timed<Integer> timedX = Timed.of(41, Timed.NamedStopwatch.of("timedX", Stopwatch.createStarted()));
             final Timed<Integer> timedY = Timed.empty(0).append(timedX, Integer::sum);
             assertEquals(timedX, timedY);
         }
@@ -47,9 +47,9 @@ class TimedTest {
         @Test
         @DisplayName("associativity")
         void associativity() {
-            final Timed<Integer> timed1 = Timed.of(2, TimerCollector.of("timed1", Stopwatch.createStarted()));
-            final Timed<Integer> timed2 = Timed.of(3, TimerCollector.of("timed1", Stopwatch.createStarted()));
-            final Timed<Integer> timed3 = Timed.of(4, TimerCollector.of("timed1", Stopwatch.createStarted()));
+            final Timed<Integer> timed1 = Timed.of(2, Timed.NamedStopwatch.of("timed1", Stopwatch.createStarted()));
+            final Timed<Integer> timed2 = Timed.of(3, Timed.NamedStopwatch.of("timed1", Stopwatch.createStarted()));
+            final Timed<Integer> timed3 = Timed.of(4, Timed.NamedStopwatch.of("timed1", Stopwatch.createStarted()));
             assertEquals((timed1.append(timed2, Integer::sum)).append(timed3, Integer::sum),
                     timed1.append((timed2.append(timed3, Integer::sum)), Integer::sum));
         }
@@ -63,27 +63,27 @@ class TimedTest {
         @Test
         @DisplayName("right identity: m >>= unit ≡ m)")
         void rightIdentity() {
-            final Timed<Integer> timedX = Timed.of(41, TimerCollector.of("timedX", Stopwatch.createStarted()));
+            final Timed<Integer> timedX = Timed.of(41, Timed.NamedStopwatch.of("timedX", Stopwatch.createStarted()));
 
-            final Function<Integer, Timed<Integer>> unit = val -> Timed.of(val, TimerCollector.empty());
+            final Function<Integer, Timed<Integer>> unit = val -> Timed.of(val, Timed.NamedStopwatch.empty());
             assertEquals(timedX.flatMap(unit), timedX);
         }
 
         @Test
         @DisplayName("left identity: (unit x) >>= f ≡ f x)")
         void leftIdentity() {
-            final TimerCollector timed1 = TimerCollector.of("Acme", Stopwatch.createStarted());
-            final TimerCollector timed2 = TimerCollector.empty().append(timed1);
+            final Timed.NamedStopwatch timed1 = Timed.NamedStopwatch.of("Acme", Stopwatch.createStarted());
+            final Timed.NamedStopwatch timed2 = Timed.NamedStopwatch.empty().append(timed1);
             assertEquals(timed1, timed2);
         }
 
         @Test
         @DisplayName("associativity (m >>= f) >>= g ≡ m >>= (x -> f x >>= g)")
         void associativity() {
-            final Timed<Integer> timedX = Timed.of(20, TimerCollector.of("timedx", Stopwatch.createStarted()));
+            final Timed<Integer> timedX = Timed.of(20, Timed.NamedStopwatch.of("timedx", Stopwatch.createStarted()));
 
-            final Function<Integer, Timed<Integer>> f = x -> Timed.of(x * 2, TimerCollector.of("x*2", Stopwatch.createStarted()));
-            final Function<Integer, Timed<Integer>> g = x -> Timed.of(x + 1, TimerCollector.of("x+1", Stopwatch.createStarted()));
+            final Function<Integer, Timed<Integer>> f = x -> Timed.of(x * 2, Timed.NamedStopwatch.of("x*2", Stopwatch.createStarted()));
+            final Function<Integer, Timed<Integer>> g = x -> Timed.of(x + 1, Timed.NamedStopwatch.of("x+1", Stopwatch.createStarted()));
 
             assertEquals((timedX.flatMap(g)).flatMap(f), timedX.flatMap(x -> g.apply(x).flatMap(f)));
         }
@@ -113,7 +113,7 @@ class TimedTest {
                 e.printStackTrace();
             }
             stopwatch.stop();
-            return Timed.of(42, TimerCollector.of(STOPWATCH_NAME, stopwatch));
+            return Timed.of(42, Timed.NamedStopwatch.of(STOPWATCH_NAME, stopwatch));
         }
 
         @Test

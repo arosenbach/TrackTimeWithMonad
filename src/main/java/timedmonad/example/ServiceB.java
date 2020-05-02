@@ -1,10 +1,9 @@
-package logmonad.example;
+package timedmonad.example;
 
 import com.google.common.base.Stopwatch;
-import logmonad.Timed;
-import logmonad.TimerCollector;
-import logmonad.example.util.DoStuff;
-import logmonad.example.util.ListFunction;
+import timedmonad.Timed;
+import timedmonad.example.util.DoStuff;
+import timedmonad.example.util.ListFunction;
 
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +40,7 @@ public class ServiceB {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.sleep();
         stopwatch.stop();
-        return Timed.of(users.stream().filter(User::isAdult).collect(toList()), TimerCollector.of("filterAdults", stopwatch)
+        return Timed.of(users.stream().filter(User::isAdult).collect(toList()), Timed.NamedStopwatch.of("filterAdults", stopwatch)
         );
     }
 

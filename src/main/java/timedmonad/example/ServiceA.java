@@ -1,7 +1,7 @@
-package logmonad.example;
+package timedmonad.example;
 
-import logmonad.example.util.DoStuff;
-import logmonad.example.util.Random;
+import timedmonad.example.util.DoStuff;
+import timedmonad.example.util.Random;
 
 import java.util.List;
 import java.util.stream.IntStream;

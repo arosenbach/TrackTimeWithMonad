@@ -1,9 +1,8 @@
-package logmonad.example;
+package timedmonad.example;
 
 import com.google.common.base.Stopwatch;
-import logmonad.Timed;
-import logmonad.TimerCollector;
-import logmonad.example.util.DoStuff;
+import timedmonad.Timed;
+import timedmonad.example.util.DoStuff;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +38,7 @@ public class Main {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.sleep();
         stopwatch.stop();
-        return Timed.of(Void.TYPE, TimerCollector.of("checkAuthentication", stopwatch));
+        return Timed.of(Void.TYPE, Timed.NamedStopwatch.of("checkAuthentication", stopwatch));
     }
 
 }
