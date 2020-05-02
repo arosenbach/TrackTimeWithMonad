@@ -64,17 +64,15 @@ class TimedTest {
         @DisplayName("right identity: m >>= unit ≡ m)")
         void rightIdentity() {
             final Timed<Integer> timedX = Timed.of(41, Timed.NamedStopwatch.of("timedX", Stopwatch.createStarted()));
-
-            final Function<Integer, Timed<Integer>> unit = val -> Timed.of(val, Timed.NamedStopwatch.empty());
-            assertEquals(timedX.flatMap(unit), timedX);
+            assertEquals(timedX.flatMap(Timed::empty), timedX);
         }
 
         @Test
         @DisplayName("left identity: (unit x) >>= f ≡ f x)")
         void leftIdentity() {
-            final Timed.NamedStopwatch timed1 = Timed.NamedStopwatch.of("Acme", Stopwatch.createStarted());
-            final Timed.NamedStopwatch timed2 = Timed.NamedStopwatch.empty().append(timed1);
-            assertEquals(timed1, timed2);
+            final Timed<Integer> timedX = Timed.of(42, Timed.NamedStopwatch.of("add1", Stopwatch.createStarted()));
+            final Function<Integer, Timed<Integer>> add1 = x -> Timed.of(x+1, Timed.NamedStopwatch.of("add1", Stopwatch.createStarted()));
+            assertEquals(Timed.empty(41).flatMap(add1), timedX);
         }
 
         @Test
@@ -119,7 +117,7 @@ class TimedTest {
         @Test
         @DisplayName("Timed.trackTime transforms a Suplier<T> into of Supplier<Timed<T>>")
         void supplier() {
-            final Timed<Integer> actual = Timed.trackTime("aName", (Supplier<Integer>) this::returns42In300ms).get();
+            final Timed<Integer> actual = Timed.trackTime("aName", (Supplier<Integer>) this::returns42In300ms).apply();
             final Timed<Integer> expected = this.returnsTimed42In300ms();
             assertEquals(actual, expected);
             assertEquals(roundedElapsedInMillis("aName", actual),

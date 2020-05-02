@@ -2,6 +2,7 @@ package timedmonad;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
+import timedmonad.example.User;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,10 +35,10 @@ public class Timed<A> {
         return new Timed<>(emptyValue, NamedStopwatch.empty());
     }
 
-    public static <A> Supplier<Timed<A>> trackTime(final String name, final Supplier<A> supplier) {
-        return () -> {
+    public static <A, B> Function<A, Timed<B>> trackTime(final String name, final Supplier<B> supplier) {
+        return (__) -> {
             final Stopwatch stopwatch = Stopwatch.createStarted();
-            final A value = supplier.get();
+            final B value = supplier.get();
             stopwatch.stop();
             return Timed.of(value, NamedStopwatch.of(name, stopwatch));
         };
@@ -113,11 +114,11 @@ public class Timed<A> {
             return new NamedStopwatch(Collections.singletonMap(timerName, Collections.singletonList(stopwatch)));
         }
 
-        static NamedStopwatch empty() {
+        private static NamedStopwatch empty() {
             return new NamedStopwatch(Collections.emptyMap());
         }
 
-        NamedStopwatch append(final NamedStopwatch other) {
+        private NamedStopwatch append(final NamedStopwatch other) {
             final Map<String, List<Stopwatch>> newTimers =
                     Stream.concat(stopwatches.entrySet().stream(), other.stopwatches.entrySet().stream())
                             .collect(
@@ -155,7 +156,7 @@ public class Timed<A> {
             return stopwatches.getOrDefault(name, Collections.emptyList());
         }
 
-        long elapsed(final String name, final TimeUnit timeUnit) {
+        private long elapsed(final String name, final TimeUnit timeUnit) {
             return get(name)
                     .stream()
                     .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
