@@ -1,6 +1,7 @@
 package timedmonad;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableMap;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,8 +18,8 @@ import static java.util.stream.Collectors.toMap;
 
 public class Timed<A> {
 
-    private NamedStopwatch namedStopwatch;
-    private A value;
+    private final NamedStopwatch namedStopwatch;
+    private final A value;
 
     private Timed(A value, NamedStopwatch namedStopwatch) {
         this.namedStopwatch = namedStopwatch;
@@ -105,7 +106,7 @@ public class Timed<A> {
         final private Map<String, List<Stopwatch>> stopwatches;
 
         private NamedStopwatch(final Map<String, List<Stopwatch>> stopwatches) {
-            this.stopwatches = stopwatches;
+            this.stopwatches = ImmutableMap.copyOf(stopwatches);
         }
 
         public static NamedStopwatch of(final String timerName, final Stopwatch stopwatch) {
