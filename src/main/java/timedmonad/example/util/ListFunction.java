@@ -1,4 +1,4 @@
-package logmonad.example.util;
+package timedmonad.example.util;
 
 import java.util.List;
 import java.util.stream.Stream;

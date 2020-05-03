@@ -1,4 +1,4 @@
-package logmonad.example.util;
+package timedmonad.example.util;
 
 public class DoStuff {
 

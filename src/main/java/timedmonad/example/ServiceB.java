@@ -1,10 +1,9 @@
-package logmonad.example;
+package timedmonad.example;
 
 import com.google.common.base.Stopwatch;
-import logmonad.Timed;
-import logmonad.TimerCollector;
-import logmonad.example.util.DoStuff;
-import logmonad.example.util.ListFunction;
+import timedmonad.Timed;
+import timedmonad.example.util.DoStuff;
+import timedmonad.example.util.ListFunction;
 
 import java.util.Collections;
 import java.util.List;
@@ -15,7 +14,7 @@ import static java.util.stream.Collectors.toList;
 public class ServiceB {
     public Timed<List<User>> getUsers(final List<String> ids) {
         return ids.stream()
-                .map(Timed.trackTime("getUser", this::getUser))
+                .map(Timed.lift("getUser", this::getUser))
                 .reduce(Timed.empty(Collections.emptyList()),
                         (acc, next) -> acc.append(next, ListFunction::add),
                         (timedListA, timedListB) -> timedListA.append(timedListB, this::concatenateLists));
@@ -37,12 +36,8 @@ public class ServiceB {
         return new User(userId);
     }
 
-    public Timed<List<User>> filterAdults(final List<User> users) {
-        final Stopwatch stopwatch = Stopwatch.createStarted();
-        DoStuff.sleep();
-        stopwatch.stop();
-        return Timed.of(users.stream().filter(User::isAdult).collect(toList()), TimerCollector.of("filterAdults", stopwatch)
-        );
+    public List<User> filterAdults(final List<User> users) {
+      return users.stream().filter(User::isAdult).collect(toList());
     }
 
 }

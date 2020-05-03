@@ -1,9 +1,8 @@
-package logmonad.example;
+package timedmonad.example;
 
 import com.google.common.base.Stopwatch;
-import logmonad.Timed;
-import logmonad.TimerCollector;
-import logmonad.example.util.DoStuff;
+import timedmonad.Timed;
+import timedmonad.example.util.DoStuff;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -14,9 +13,9 @@ public class Main {
         final ServiceB serviceB = new ServiceB();
 
         final Timed<List<User>> adultUsers = checkAuthentication()
-                .flatMap(Timed.trackTime("ServiceA::getUserIds", serviceA::getUserIds))
+                .flatMap(Timed.lift("ServiceA::getUserIds", serviceA::getUserIds))
                 .flatMap(serviceB::getUsers)
-                .flatMap(serviceB::filterAdults);
+                .flatMap(Timed.lift("ServiceB::filterAdults", serviceB::filterAdults));
 
         System.out.println(adultUsers);
         System.out.println("getUser total -> " + adultUsers.getStopwatches("getUser")
@@ -39,7 +38,7 @@ public class Main {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.sleep();
         stopwatch.stop();
-        return Timed.of(Void.TYPE, TimerCollector.of("checkAuthentication", stopwatch));
+        return Timed.of(Void.TYPE, Timed.NamedStopwatch.of("checkAuthentication", stopwatch));
     }
 
 }

@@ -1,4 +1,4 @@
-package logmonad.example.util;
+package timedmonad.example.util;
 
 public class Random {
     public static int getRandomInt(int min, int max) {

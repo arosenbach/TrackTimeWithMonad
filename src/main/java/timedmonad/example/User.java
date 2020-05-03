@@ -1,6 +1,6 @@
-package logmonad.example;
+package timedmonad.example;
 
-import logmonad.example.util.Random;
+import timedmonad.example.util.Random;
 
 public class User {
     private final String id;
