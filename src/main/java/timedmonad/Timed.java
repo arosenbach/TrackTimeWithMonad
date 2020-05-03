@@ -7,31 +7,31 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public class Timed<A> {
 
-    private final NamedStopwatch namedStopwatch;
+    private final Map<String, List<NamedStopwatch>> stopwatches;
     private final A value;
 
-    private Timed(A value, NamedStopwatch namedStopwatch) {
-        this.namedStopwatch = namedStopwatch;
+    private Timed(A value, Map<String, List<NamedStopwatch>> stopwatches) {
+        this.stopwatches = ImmutableMap.copyOf(stopwatches);
         this.value = value;
     }
 
     public static <A> Timed<A> of(A value, NamedStopwatch namedStopwatch) {
-        return new Timed<>(value, namedStopwatch);
+        return new Timed<>(value, Stream.of(namedStopwatch).collect(groupingBy(NamedStopwatch::getName)));
     }
 
     public static <A> Timed<A> empty(A emptyValue) {
-        return new Timed<>(emptyValue, NamedStopwatch.empty());
+        return new Timed<>(emptyValue, Collections.emptyMap());
     }
 
     public static <A> Supplier<Timed<A>> lift(final String name, final Supplier<A> supplier) {
@@ -63,16 +63,29 @@ public class Timed<A> {
 
     public <B> Timed<B> flatMap(Supplier<Timed<B>> f) {
         Timed<B> mappedTimed = f.get();
-        return new Timed<>(mappedTimed.value, namedStopwatch.append(mappedTimed.namedStopwatch));
+        return new Timed<>(mappedTimed.value, mergeStopwatches(mappedTimed.stopwatches));
     }
 
     public <B> Timed<B> flatMap(Function<A, Timed<B>> f) {
         Timed<B> mappedTimed = f.apply(value);
-        return new Timed<>(mappedTimed.value, namedStopwatch.append(mappedTimed.namedStopwatch));
+        return new Timed<>(mappedTimed.value, mergeStopwatches(mappedTimed.stopwatches));
     }
 
     public <B> Timed<A> append(final Timed<B> other, BiFunction<A, B, A> mergeFunction) {
-        return Timed.of(mergeFunction.apply(value, other.value), this.namedStopwatch.append(other.namedStopwatch));
+        return new Timed<>(mergeFunction.apply(value, other.value), mergeStopwatches(other.stopwatches));
+    }
+
+    private Map<String, List<NamedStopwatch>> mergeStopwatches(final Map<String, List<NamedStopwatch>> otherStopwatches) {
+        return Stream.concat(stopwatches.entrySet().stream(), otherStopwatches.entrySet().stream())
+                .collect(toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        this::concatenateLists));
+    }
+
+    private <T> List<T> concatenateLists(List<T> listA, List<T> listB) {
+        return Stream.concat(listA.stream(), listB.stream())
+                .collect(toList());
     }
 
     public A getValue() {
@@ -80,13 +93,16 @@ public class Timed<A> {
     }
 
     public List<Stopwatch> getStopwatches(String name) {
-        return namedStopwatch.get(name);
+        return stopwatches.getOrDefault(name, Collections.emptyList())
+                .stream()
+                .map(NamedStopwatch::getStopwatch)
+                .collect(toList());
     }
 
     @Override
     public String toString() {
         return "Timed{" +
-                "timerCollector=" + namedStopwatch +
+                "stopwatches=" + stopwatches +
                 ", value=" + value +
                 '}';
     }
@@ -96,74 +112,56 @@ public class Timed<A> {
         if (this == runnable) return true;
         if (runnable == null || getClass() != runnable.getClass()) return false;
         final Timed<?> timed = (Timed<?>) runnable;
-        return Objects.equals(namedStopwatch, timed.namedStopwatch) &&
+        return Objects.equals(stopwatches, timed.stopwatches) &&
                 Objects.equals(value, timed.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(namedStopwatch, value);
+        return Objects.hash(stopwatches, value);
     }
 
     public static class NamedStopwatch {
 
-        final private Map<String, List<Stopwatch>> stopwatches;
+        private String name;
+        private Stopwatch stopwatch;
 
-        private NamedStopwatch(final Map<String, List<Stopwatch>> stopwatches) {
-            this.stopwatches = ImmutableMap.copyOf(stopwatches);
+        private NamedStopwatch(final String name, final Stopwatch stopwatch) {
+            this.name = name;
+            this.stopwatch = stopwatch;
         }
 
-        public static NamedStopwatch of(final String timerName, final Stopwatch stopwatch) {
-            return new NamedStopwatch(Collections.singletonMap(timerName, Collections.singletonList(stopwatch)));
+        public static NamedStopwatch of(final String name, final Stopwatch stopwatch) {
+            return new NamedStopwatch(name, stopwatch);
         }
 
-        private static NamedStopwatch empty() {
-            return new NamedStopwatch(Collections.emptyMap());
+        private String getName() {
+            return name;
         }
 
-        private NamedStopwatch append(final NamedStopwatch other) {
-            final Map<String, List<Stopwatch>> newTimers =
-                    Stream.concat(stopwatches.entrySet().stream(), other.stopwatches.entrySet().stream())
-                            .collect(
-                                    toMap(Map.Entry::getKey,
-                                            Map.Entry::getValue,
-                                            this::concatenateLists));
-            return new NamedStopwatch(newTimers);
-        }
-
-        private <T> List<T> concatenateLists(List<T> listA, List<T> listB) {
-            return Stream.concat(listA.stream(), listB.stream()).collect(toList());
+        private Stopwatch getStopwatch() {
+            return this.stopwatch;
         }
 
         @Override
-        public String toString() {
-            return "TimerCollector{" +
-                    "stopwatches=" + stopwatches +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(final Object runnable) {
-            if (this == runnable) return true;
-            if (runnable == null || getClass() != runnable.getClass()) return false;
-            final NamedStopwatch that = (NamedStopwatch) runnable;
-            return Objects.equals(stopwatches.keySet(), that.stopwatches.keySet());
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            final NamedStopwatch that = (NamedStopwatch) o;
+            return name.equals(that.name);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(stopwatches);
+            return Objects.hash(name, stopwatch);
         }
 
-        private List<Stopwatch> get(final String name) {
-            return stopwatches.getOrDefault(name, Collections.emptyList());
-        }
-
-        private long elapsed(final String name, final TimeUnit timeUnit) {
-            return get(name)
-                    .stream()
-                    .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
-                    .sum();
+        @Override
+        public String toString() {
+            return "NamedStopwatch{" +
+                    "name='" + name + '\'' +
+                    ", stopwatch=" + stopwatch +
+                    '}';
         }
     }
 }
