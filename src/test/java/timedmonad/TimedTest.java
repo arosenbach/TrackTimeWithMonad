@@ -89,8 +89,8 @@ class TimedTest {
 
 
     @Nested
-    @DisplayName("Timed::trackTime")
-    class TrackTimeMethod {
+    @DisplayName("Timed::lift")
+    class LiftMethod {
 
         public static final String STOPWATCH_NAME = "aName";
 
@@ -115,9 +115,9 @@ class TimedTest {
         }
 
         @Test
-        @DisplayName("Timed.trackTime transforms a Suplier<T> into of Supplier<Timed<T>>")
+        @DisplayName("Timed.lift transforms a Suplier<T> into of Supplier<Timed<T>>")
         void supplier() {
-            final Timed<Integer> actual = Timed.trackTime("aName", (Supplier<Integer>) this::returns42In300ms).apply();
+            final Timed<Integer> actual = Timed.lift("aName", (Supplier<Integer>) this::returns42In300ms).get();
             final Timed<Integer> expected = this.returnsTimed42In300ms();
             assertEquals(actual, expected);
             assertEquals(roundedElapsedInMillis("aName", actual),
@@ -135,9 +135,9 @@ class TimedTest {
         }
 
         @Test
-        @DisplayName("Timed.trackTime transforms a Function<A,T> into of Function<A,<Timed<T>>")
+        @DisplayName("Timed.lift transforms a Function<A,T> into of Function<A,<Timed<T>>")
         void function() {
-            final Timed<Integer> actual = Timed.trackTime("aName", (Function<Integer, Integer>) this::returns42In300ms).apply(42);
+            final Timed<Integer> actual = Timed.lift("aName", (Function<Integer, Integer>) this::returns42In300ms).apply(42);
             final Timed<Integer> expected = this.returnsTimed42In300ms(42);
             assertEquals(actual, expected);
             assertEquals(roundedElapsedInMillis("aName", actual),
@@ -154,9 +154,9 @@ class TimedTest {
         }
 
         @Test
-        @DisplayName("Timed.trackTime transforms a BiFunction<A,B,T> into of BiFunction<A,B,<Timed<T>>")
+        @DisplayName("Timed.lift transforms a BiFunction<A,B,T> into of BiFunction<A,B,<Timed<T>>")
         void biFunction() {
-            final Timed<Integer> actual = Timed.trackTime("aName", (BiFunction<Integer, Integer, Integer>) this::returns42In300ms).apply(42, 42);
+            final Timed<Integer> actual = Timed.lift("aName", (BiFunction<Integer, Integer, Integer>) this::returns42In300ms).apply(42, 42);
             final Timed<Integer> expected = this.returnsTimed42In300ms(42, 42);
             assertEquals(actual, expected);
             assertEquals(roundedElapsedInMillis("aName", actual),

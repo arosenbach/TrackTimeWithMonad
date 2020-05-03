@@ -2,7 +2,6 @@ package timedmonad;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
-import timedmonad.example.User;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,16 +34,16 @@ public class Timed<A> {
         return new Timed<>(emptyValue, NamedStopwatch.empty());
     }
 
-    public static <A, B> Function<A, Timed<B>> trackTime(final String name, final Supplier<B> supplier) {
-        return (__) -> {
+    public static <A> Supplier<Timed<A>> lift(final String name, final Supplier<A> supplier) {
+        return () -> {
             final Stopwatch stopwatch = Stopwatch.createStarted();
-            final B value = supplier.get();
+            final A value = supplier.get();
             stopwatch.stop();
             return Timed.of(value, NamedStopwatch.of(name, stopwatch));
         };
     }
 
-    public static <A, B> Function<A, Timed<B>> trackTime(final String name, final Function<A, B> function) {
+    public static <A, B> Function<A, Timed<B>> lift(final String name, final Function<A, B> function) {
         return (arg) -> {
             final Stopwatch stopwatch = Stopwatch.createStarted();
             final B value = function.apply(arg);
@@ -53,7 +52,7 @@ public class Timed<A> {
         };
     }
 
-    public static <A, B, C> BiFunction<A, B, Timed<C>> trackTime(final String name, final BiFunction<A, B, C> biFunction) {
+    public static <A, B, C> BiFunction<A, B, Timed<C>> lift(final String name, final BiFunction<A, B, C> biFunction) {
         return (arg1, arg2) -> {
             final Stopwatch stopwatch = Stopwatch.createStarted();
             final C value = biFunction.apply(arg1, arg2);
@@ -62,6 +61,10 @@ public class Timed<A> {
         };
     }
 
+    public <B> Timed<B> flatMap(Supplier<Timed<B>> f) {
+        Timed<B> mappedTimed = f.get();
+        return new Timed<>(mappedTimed.value, namedStopwatch.append(mappedTimed.namedStopwatch));
+    }
 
     public <B> Timed<B> flatMap(Function<A, Timed<B>> f) {
         Timed<B> mappedTimed = f.apply(value);
