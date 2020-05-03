@@ -120,9 +120,9 @@ class TimedTest {
         void supplier() {
             final Timed<Integer> actual = Timed.lift("aName", (Supplier<Integer>) this::returns42In300ms).get();
             final Timed<Integer> expected = this.returnsTimed42In300ms();
-            assertEquals(actual, expected);
-            assertEquals(roundedElapsedInMillis("aName", actual),
-                    roundedElapsedInMillis("aName", expected));
+            assertEquals(expected, actual);
+            assertEquals(roundedElapsedInMillis("aName", expected),
+                    roundedElapsedInMillis("aName", actual));
 
         }
 
@@ -140,9 +140,9 @@ class TimedTest {
         void function() {
             final Timed<Integer> actual = Timed.lift("aName", (Function<Integer, Integer>) this::returns42In300ms).apply(42);
             final Timed<Integer> expected = this.returnsTimed42In300ms(42);
-            assertEquals(actual, expected);
-            assertEquals(roundedElapsedInMillis("aName", actual),
-                    roundedElapsedInMillis("aName", expected));
+            assertEquals(expected, actual);
+            assertEquals(roundedElapsedInMillis("aName", expected),
+                    roundedElapsedInMillis("aName", actual));
 
         }
 
@@ -159,9 +159,9 @@ class TimedTest {
         void biFunction() {
             final Timed<Integer> actual = Timed.lift("aName", (BiFunction<Integer, Integer, Integer>) this::returns42In300ms).apply(42, 42);
             final Timed<Integer> expected = this.returnsTimed42In300ms(42, 42);
-            assertEquals(actual, expected);
-            assertEquals(roundedElapsedInMillis("aName", actual),
-                    roundedElapsedInMillis("aName", expected));
+            assertEquals(expected, actual);
+            assertEquals(roundedElapsedInMillis("aName", expected),
+                    roundedElapsedInMillis("aName", actual));
 
         }
 
