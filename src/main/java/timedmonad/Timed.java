@@ -114,7 +114,8 @@ public class Timed<A> {
 
     public Optional<Long> elapsed(final String name, final TimeUnit timeUnit) {
         return Optional.ofNullable(stopwatches.get(name))
-                .map(list -> list.stream().map(NamedStopwatch::getStopwatch)
+                .map(list -> list.stream()
+                        .map(NamedStopwatch::getStopwatch)
                         .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
                         .sum());
     }
