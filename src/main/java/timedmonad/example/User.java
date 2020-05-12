@@ -15,6 +15,10 @@ public class User {
         return age >= 21;
     }
 
+    public String getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         return "User{" +

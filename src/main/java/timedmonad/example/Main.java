@@ -5,9 +5,17 @@ import timedmonad.Timed;
 import timedmonad.example.util.DoStuff;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 public class Main {
+
+    public static final String CHECK_AUTHENTICATION = "checkAuthentication";
+
     public static void main(String... args) {
         final ServiceA serviceA = new ServiceA();
         final ServiceB serviceB = new ServiceB();
@@ -17,19 +25,27 @@ public class Main {
                 .flatMap(serviceB::getUsers)
                 .flatMap(Timed.lift("ServiceB::filterAdults", serviceB::filterAdults));
 
-        System.out.println(adultUsers);
-        System.out.println("getUser total -> " + adultUsers.getStopwatches("getUser")
-                .stream()
-                .mapToLong(stopwatch -> stopwatch.elapsed(TimeUnit.MILLISECONDS))
-                .sum() + " ms");
+        System.out.println(adultUsers.getAllStopwatches());
 
-        System.out.println(adultUsers.getValue());
+//        System.out.println("List of adult users: " + adultUsers.getValue()
+//                .stream()
+//                .map(User::getId)
+//                .collect(Collectors.joining(", ")));
 
-        adultUsers.getStopwatches("getUser")
-                .stream()
-                .mapToLong(stopwatch -> stopwatch.elapsed(TimeUnit.MILLISECONDS))
-                .average()
-                .ifPresent(avg -> System.out.println("getUser average -> " + avg + " ms"));
+        adultUsers.elapsed(CHECK_AUTHENTICATION, TimeUnit.MILLISECONDS)
+                .ifPresent(value -> System.out.println(CHECK_AUTHENTICATION + "time : " + value + " ms"));
+//
+//        final long getUserTotalTime = adultUsers.getStopwatches(ServiceB.GET_USER)
+//                .stream()
+//                .mapToLong(stopwatch -> stopwatch.elapsed(TimeUnit.MILLISECONDS))
+//                .sum();
+//        System.out.println(ServiceB.GET_USER + " total time : " + getUserTotalTime + " ms");
+//
+//        adultUsers.getStopwatches(ServiceB.GET_USER)
+//                .stream()
+//                .mapToLong(stopwatch -> stopwatch.elapsed(TimeUnit.MILLISECONDS))
+//                .average()
+//                .ifPresent(avg -> System.out.println(ServiceB.GET_USER + " average time : " + avg + " ms"));
 
 
     }
@@ -38,7 +54,7 @@ public class Main {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.sleep();
         stopwatch.stop();
-        return Timed.of(Void.TYPE, Timed.NamedStopwatch.of("checkAuthentication", stopwatch));
+        return Timed.of(Void.TYPE, Timed.NamedStopwatch.of(CHECK_AUTHENTICATION, stopwatch));
     }
 
 }

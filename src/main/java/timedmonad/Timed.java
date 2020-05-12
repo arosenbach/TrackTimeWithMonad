@@ -3,10 +3,13 @@ package timedmonad;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -92,11 +95,28 @@ public class Timed<A> {
         return value;
     }
 
+    public Map<String, List<Stopwatch>> getAllStopwatches() {
+        return stopwatches.values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(toMap(
+                        NamedStopwatch::getName,
+                        namedStopwatch -> Collections.singletonList(namedStopwatch.getStopwatch()),
+                        this::concatenateLists));
+    }
+
     public List<Stopwatch> getStopwatches(String name) {
         return stopwatches.getOrDefault(name, Collections.emptyList())
                 .stream()
                 .map(NamedStopwatch::getStopwatch)
                 .collect(toList());
+    }
+
+    public Optional<Long> elapsed(final String name, final TimeUnit timeUnit) {
+        return Optional.ofNullable(stopwatches.get(name))
+                .map(list -> list.stream().map(NamedStopwatch::getStopwatch)
+                        .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
+                        .sum());
     }
 
     @Override

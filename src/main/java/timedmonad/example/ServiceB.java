@@ -1,6 +1,5 @@
 package timedmonad.example;
 
-import com.google.common.base.Stopwatch;
 import timedmonad.Timed;
 import timedmonad.example.util.DoStuff;
 import timedmonad.example.util.ListFunction;
@@ -12,9 +11,12 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 
 public class ServiceB {
+
+    public static final String GET_USER = "ServiceB::getUser";
+
     public Timed<List<User>> getUsers(final List<String> ids) {
         return ids.stream()
-                .map(Timed.lift("getUser", this::getUser))
+                .map(Timed.lift(GET_USER, this::getUser))
                 .reduce(Timed.empty(Collections.emptyList()),
                         (acc, next) -> acc.append(next, ListFunction::add),
                         (timedListA, timedListB) -> timedListA.append(timedListB, this::concatenateLists));
