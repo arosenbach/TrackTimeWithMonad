@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
@@ -141,6 +142,30 @@ public class Timed<A> {
                 .map(Stopwatch::getStopwatch)
                 .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
                 .average();
+    }
+
+    public OptionalLong min(final String id, final TimeUnit timeUnit) {
+        final List<Stopwatch> stopwatches = this.stopwatches.get(id);
+        if (stopwatches == null) {
+            return OptionalLong.empty();
+        }
+        return stopwatches
+                .stream()
+                .map(Stopwatch::getStopwatch)
+                .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
+                .min();
+    }
+
+    public OptionalLong max(final String id, final TimeUnit timeUnit) {
+        final List<Stopwatch> stopwatches = this.stopwatches.get(id);
+        if (stopwatches == null) {
+            return OptionalLong.empty();
+        }
+        return stopwatches
+                .stream()
+                .map(Stopwatch::getStopwatch)
+                .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
+                .max();
     }
 
     @Override

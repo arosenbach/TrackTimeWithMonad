@@ -46,6 +46,17 @@ public class Main {
         adultUsers.average(ServiceB.GET_USER, TimeUnit.MILLISECONDS)
                 .ifPresent(avg -> System.out.println(ServiceB.GET_USER + " average time : " + avg + " ms"));
 
+        // Min / Max
+        adultUsers.min(ServiceB.GET_USER, TimeUnit.MILLISECONDS)
+                .ifPresent(avg -> System.out.println(ServiceB.GET_USER + " min time : " + avg + " ms"));
+        adultUsers.max(ServiceB.GET_USER, TimeUnit.MILLISECONDS)
+                .ifPresent(avg -> System.out.println(ServiceB.GET_USER + " max time : " + avg + " ms"));
+
+        // Percentile
+        //TODO
+//        adultUsers.percentile(95, ServiceB.GET_USER, TimeUnit.MILLISECONDS)
+//                .ifPresent(p95 -> System.out.println(ServiceB.GET_USER + " p95 time : " + p95 + " ms"));
+
 
         // TODO total time
 //        System.out.println("TOTAL time: "+adultUsers.elapsed(TimeUnit.MILLISECONDS));
