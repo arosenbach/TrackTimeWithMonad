@@ -7,7 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -113,16 +114,33 @@ public class Timed<A> {
 
     /**
      * Provides the sum of the times for a given stopwatch id
-     * @param id id of a stopwatch
+     *
+     * @param id       id of a stopwatch
      * @param timeUnit
      * @return
      */
-    public Optional<Long> elapsed(final String id, final TimeUnit timeUnit) {
-        return Optional.ofNullable(stopwatches.get(id))
-                .map(list -> list.stream()
-                        .map(Stopwatch::getStopwatch)
-                        .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
-                        .sum());
+    public OptionalLong elapsed(final String id, final TimeUnit timeUnit) {
+        final List<Stopwatch> stopwatches = this.stopwatches.get(id);
+        if (stopwatches == null) {
+            return OptionalLong.empty();
+        }
+        return OptionalLong.of(stopwatches
+                .stream()
+                .map(Stopwatch::getStopwatch)
+                .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
+                .sum());
+    }
+
+    public OptionalDouble average(final String id, final TimeUnit timeUnit) {
+        final List<Stopwatch> stopwatches = this.stopwatches.get(id);
+        if (stopwatches == null) {
+            return OptionalDouble.empty();
+        }
+        return stopwatches
+                .stream()
+                .map(Stopwatch::getStopwatch)
+                .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
+                .average();
     }
 
     @Override

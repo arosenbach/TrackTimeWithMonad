@@ -32,22 +32,20 @@ public class Main {
                 .collect(Collectors.joining(", ")));
 
 
+        // Elapsed
         adultUsers.elapsed(CHECK_AUTHENTICATION, TimeUnit.MILLISECONDS)
                 .ifPresent(value -> System.out.println(CHECK_AUTHENTICATION + " time : " + value + " ms"));
         adultUsers.elapsed(GET_USER_IDS, TimeUnit.MILLISECONDS)
                 .ifPresent(value -> System.out.println(GET_USER_IDS + " time : " + value + " ms"));
         adultUsers.elapsed(ServiceB.GET_USER, TimeUnit.MILLISECONDS)
                 .ifPresent(value -> System.out.println(ServiceB.GET_USER + " time : " + value + " ms"));
-
-        // TODO average time of 1 stopwatch
-        adultUsers.getStopwatches(ServiceB.GET_USER)
-                .stream()
-                .mapToLong(stopwatch -> stopwatch.elapsed(TimeUnit.MILLISECONDS))
-                .average()
-                .ifPresent(avg -> System.out.println(ServiceB.GET_USER + " average time : " + avg + " ms"));
-
         adultUsers.elapsed(FILTER_ADULTS, TimeUnit.MILLISECONDS)
                 .ifPresent(value -> System.out.println(FILTER_ADULTS + " time : " + value + " ms"));
+
+        // Average
+        adultUsers.average(ServiceB.GET_USER, TimeUnit.MILLISECONDS)
+                .ifPresent(avg -> System.out.println(ServiceB.GET_USER + " average time : " + avg + " ms"));
+
 
         // TODO total time
 //        System.out.println("TOTAL time: "+adultUsers.elapsed(TimeUnit.MILLISECONDS));
