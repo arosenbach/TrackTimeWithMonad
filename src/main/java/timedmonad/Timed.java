@@ -1,6 +1,5 @@
 package timedmonad;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Collection;
@@ -21,46 +20,46 @@ import static java.util.stream.Collectors.toMap;
 
 public class Timed<A> {
 
-    private final Map<String, List<NamedStopwatch>> stopwatches;
+    private final Map<String, List<Stopwatch>> stopwatches;
     private final A value;
 
-    private Timed(A value, Map<String, List<NamedStopwatch>> stopwatches) {
+    private Timed(A value, Map<String, List<Stopwatch>> stopwatches) {
         this.stopwatches = ImmutableMap.copyOf(stopwatches);
         this.value = value;
     }
 
-    public static <A> Timed<A> of(A value, NamedStopwatch namedStopwatch) {
-        return new Timed<>(value, Stream.of(namedStopwatch).collect(groupingBy(NamedStopwatch::getName)));
+    public static <A> Timed<A> of(A value, Stopwatch stopwatch) {
+        return new Timed<>(value, Stream.of(stopwatch).collect(groupingBy(Stopwatch::getId)));
     }
 
     public static <A> Timed<A> empty(A emptyValue) {
         return new Timed<>(emptyValue, Collections.emptyMap());
     }
 
-    public static <A> Supplier<Timed<A>> lift(final String name, final Supplier<A> supplier) {
+    public static <A> Supplier<Timed<A>> lift(final String id, final Supplier<A> supplier) {
         return () -> {
-            final Stopwatch stopwatch = Stopwatch.createStarted();
+            final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted();
             final A value = supplier.get();
             stopwatch.stop();
-            return Timed.of(value, NamedStopwatch.of(name, stopwatch));
+            return Timed.of(value, Stopwatch.of(id, stopwatch));
         };
     }
 
-    public static <A, B> Function<A, Timed<B>> lift(final String name, final Function<A, B> function) {
+    public static <A, B> Function<A, Timed<B>> lift(final String id, final Function<A, B> function) {
         return (arg) -> {
-            final Stopwatch stopwatch = Stopwatch.createStarted();
+            final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted();
             final B value = function.apply(arg);
             stopwatch.stop();
-            return Timed.of(value, NamedStopwatch.of(name, stopwatch));
+            return Timed.of(value, Stopwatch.of(id, stopwatch));
         };
     }
 
-    public static <A, B, C> BiFunction<A, B, Timed<C>> lift(final String name, final BiFunction<A, B, C> biFunction) {
+    public static <A, B, C> BiFunction<A, B, Timed<C>> lift(final String id, final BiFunction<A, B, C> biFunction) {
         return (arg1, arg2) -> {
-            final Stopwatch stopwatch = Stopwatch.createStarted();
+            final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted();
             final C value = biFunction.apply(arg1, arg2);
             stopwatch.stop();
-            return Timed.of(value, NamedStopwatch.of(name, stopwatch));
+            return Timed.of(value, Stopwatch.of(id, stopwatch));
         };
     }
 
@@ -78,7 +77,7 @@ public class Timed<A> {
         return new Timed<>(mergeFunction.apply(value, other.value), mergeStopwatches(other.stopwatches));
     }
 
-    private Map<String, List<NamedStopwatch>> mergeStopwatches(final Map<String, List<NamedStopwatch>> otherStopwatches) {
+    private Map<String, List<Stopwatch>> mergeStopwatches(final Map<String, List<Stopwatch>> otherStopwatches) {
         return Stream.concat(stopwatches.entrySet().stream(), otherStopwatches.entrySet().stream())
                 .collect(toMap(
                         Map.Entry::getKey,
@@ -95,27 +94,33 @@ public class Timed<A> {
         return value;
     }
 
-    public Map<String, List<Stopwatch>> getAllStopwatches() {
+    public Map<String, List<com.google.common.base.Stopwatch>> getAllStopwatches() {
         return stopwatches.values()
                 .stream()
                 .flatMap(Collection::stream)
                 .collect(toMap(
-                        NamedStopwatch::getName,
-                        namedStopwatch -> Collections.singletonList(namedStopwatch.getStopwatch()),
+                        Stopwatch::getId,
+                        stopwatch -> Collections.singletonList(stopwatch.getStopwatch()),
                         this::concatenateLists));
     }
 
-    public List<Stopwatch> getStopwatches(String name) {
-        return stopwatches.getOrDefault(name, Collections.emptyList())
+    public List<com.google.common.base.Stopwatch> getStopwatches(String id) {
+        return stopwatches.getOrDefault(id, Collections.emptyList())
                 .stream()
-                .map(NamedStopwatch::getStopwatch)
+                .map(Stopwatch::getStopwatch)
                 .collect(toList());
     }
 
-    public Optional<Long> elapsed(final String name, final TimeUnit timeUnit) {
-        return Optional.ofNullable(stopwatches.get(name))
+    /**
+     * Provides the sum of the times for a given stopwatch id
+     * @param id id of a stopwatch
+     * @param timeUnit
+     * @return
+     */
+    public Optional<Long> elapsed(final String id, final TimeUnit timeUnit) {
+        return Optional.ofNullable(stopwatches.get(id))
                 .map(list -> list.stream()
-                        .map(NamedStopwatch::getStopwatch)
+                        .map(Stopwatch::getStopwatch)
                         .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
                         .sum());
     }
@@ -142,25 +147,25 @@ public class Timed<A> {
         return Objects.hash(stopwatches, value);
     }
 
-    public static class NamedStopwatch {
+    public static class Stopwatch {
 
-        private String name;
-        private Stopwatch stopwatch;
+        private String id;
+        private com.google.common.base.Stopwatch stopwatch;
 
-        private NamedStopwatch(final String name, final Stopwatch stopwatch) {
-            this.name = name;
+        private Stopwatch(final String id, final com.google.common.base.Stopwatch stopwatch) {
+            this.id = id;
             this.stopwatch = stopwatch;
         }
 
-        public static NamedStopwatch of(final String name, final Stopwatch stopwatch) {
-            return new NamedStopwatch(name, stopwatch);
+        public static Stopwatch of(final String id, final com.google.common.base.Stopwatch stopwatch) {
+            return new Stopwatch(id, stopwatch);
         }
 
-        private String getName() {
-            return name;
+        private String getId() {
+            return id;
         }
 
-        private Stopwatch getStopwatch() {
+        private com.google.common.base.Stopwatch getStopwatch() {
             return this.stopwatch;
         }
 
@@ -168,19 +173,19 @@ public class Timed<A> {
         public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final NamedStopwatch that = (NamedStopwatch) o;
-            return name.equals(that.name);
+            final Stopwatch that = (Stopwatch) o;
+            return id.equals(that.id);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, stopwatch);
+            return Objects.hash(id, stopwatch);
         }
 
         @Override
         public String toString() {
-            return "NamedStopwatch{" +
-                    "name='" + name + '\'' +
+            return "Stopwatch{" +
+                    "id='" + id + '\'' +
                     ", stopwatch=" + stopwatch +
                     '}';
         }

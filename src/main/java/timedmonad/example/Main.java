@@ -1,6 +1,5 @@
 package timedmonad.example;
 
-import com.google.common.base.Stopwatch;
 import timedmonad.Timed;
 import timedmonad.example.util.DoStuff;
 
@@ -40,6 +39,7 @@ public class Main {
         adultUsers.elapsed(ServiceB.GET_USER, TimeUnit.MILLISECONDS)
                 .ifPresent(value -> System.out.println(ServiceB.GET_USER + " time : " + value + " ms"));
 
+        // TODO average time of 1 stopwatch
         adultUsers.getStopwatches(ServiceB.GET_USER)
                 .stream()
                 .mapToLong(stopwatch -> stopwatch.elapsed(TimeUnit.MILLISECONDS))
@@ -49,6 +49,7 @@ public class Main {
         adultUsers.elapsed(FILTER_ADULTS, TimeUnit.MILLISECONDS)
                 .ifPresent(value -> System.out.println(FILTER_ADULTS + " time : " + value + " ms"));
 
+        // TODO total time
 //        System.out.println("TOTAL time: "+adultUsers.elapsed(TimeUnit.MILLISECONDS));
 
 
@@ -56,10 +57,10 @@ public class Main {
     }
 
     private static Timed<Class<Void>> checkAuthentication() {
-        final Stopwatch stopwatch = Stopwatch.createStarted();
+        final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted();
         DoStuff.sleep();
         stopwatch.stop();
-        return Timed.of(Void.TYPE, Timed.NamedStopwatch.of(CHECK_AUTHENTICATION, stopwatch));
+        return Timed.of(Void.TYPE, Timed.Stopwatch.of(CHECK_AUTHENTICATION, stopwatch));
     }
 
 }
