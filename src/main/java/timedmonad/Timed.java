@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
@@ -96,23 +95,6 @@ public class Timed<A> {
         return value;
     }
 
-    public Map<String, List<com.google.common.base.Stopwatch>> getAllStopwatches() {
-        return stopwatches.values()
-                .stream()
-                .flatMap(Collection::stream)
-                .collect(toMap(
-                        Stopwatch::getId,
-                        stopwatch -> Collections.singletonList(stopwatch.getStopwatch()),
-                        this::concatenateLists));
-    }
-
-    public List<com.google.common.base.Stopwatch> getStopwatches(String id) {
-        return stopwatches.getOrDefault(id, Collections.emptyList())
-                .stream()
-                .map(Stopwatch::getStopwatch)
-                .collect(toList());
-    }
-
     /**
      * Provides the sum of the times for a given stopwatch id
      *
@@ -132,6 +114,12 @@ public class Timed<A> {
                 .sum());
     }
 
+    /**
+     * Provides the sum of all times
+     *
+     * @param timeUnit
+     * @return
+     */
     public long elapsed(final TimeUnit timeUnit) {
         return this.stopwatches.values()
                 .stream()

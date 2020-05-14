@@ -71,7 +71,7 @@ class TimedTest {
         @DisplayName("left identity: (unit x) >>= f ≡ f x)")
         void leftIdentity() {
             final Timed<Integer> timedX = Timed.of(42, Stopwatch.of("add1", com.google.common.base.Stopwatch.createStarted()));
-            final Function<Integer, Timed<Integer>> add1 = x -> Timed.of(x+1, Stopwatch.of("add1", com.google.common.base.Stopwatch.createStarted()));
+            final Function<Integer, Timed<Integer>> add1 = x -> Timed.of(x + 1, Stopwatch.of("add1", com.google.common.base.Stopwatch.createStarted()));
             assertEquals(Timed.empty(41).flatMap(add1), timedX);
         }
 
@@ -164,9 +164,9 @@ class TimedTest {
 
         }
 
-
-        private String roundedElapsedInMillis(final String name, final Timed<Integer> timed1) {
-            return new DecimalFormat("0.0").format(timed1.getStopwatches(name).stream().mapToLong(s -> s.elapsed(TimeUnit.MILLISECONDS)).sum() / 1000F);
+        private String roundedElapsedInMillis(final String name, final Timed<Integer> timed) {
+            final long elapsed = timed.elapsed(name, TimeUnit.MILLISECONDS).orElse(0L);
+            return new DecimalFormat("0.0").format(elapsed / 1000F);
         }
     }
 
