@@ -132,6 +132,15 @@ public class Timed<A> {
                 .sum());
     }
 
+    public long elapsed(final TimeUnit timeUnit) {
+        return this.stopwatches.values()
+                .stream()
+                .flatMap(Collection::stream)
+                .map(Stopwatch::getStopwatch)
+                .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
+                .sum();
+    }
+
     public OptionalDouble average(final String id, final TimeUnit timeUnit) {
         final List<Stopwatch> stopwatches = this.stopwatches.get(id);
         if (stopwatches == null) {

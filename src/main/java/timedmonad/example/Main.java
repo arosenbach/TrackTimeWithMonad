@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toMap;
-
 public class Main {
 
     public static final String CHECK_AUTHENTICATION = "checkAuthentication";
@@ -24,13 +22,23 @@ public class Main {
                 .flatMap(serviceB::getUsers)
                 .flatMap(Timed.lift(FILTER_ADULTS, serviceB::filterAdults));
 
-        System.out.println(adultUsers.getAllStopwatches());
-
         System.out.println("List of adult users: " + adultUsers.getValue()
                 .stream()
                 .map(User::getId)
                 .collect(Collectors.joining(", ")));
 
+        printTimes(adultUsers);
+    }
+
+    private static Timed<Class<Void>> checkAuthentication() {
+        final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted();
+        DoStuff.sleep();
+        stopwatch.stop();
+        return Timed.of(Void.TYPE, Timed.Stopwatch.of(CHECK_AUTHENTICATION, stopwatch));
+    }
+
+    private static void printTimes(final Timed<List<User>> adultUsers) {
+        System.out.println("====== Times =======");
 
         // Elapsed
         adultUsers.elapsed(CHECK_AUTHENTICATION, TimeUnit.MILLISECONDS)
@@ -52,24 +60,8 @@ public class Main {
         adultUsers.max(ServiceB.GET_USER, TimeUnit.MILLISECONDS)
                 .ifPresent(avg -> System.out.println(ServiceB.GET_USER + " max time : " + avg + " ms"));
 
-        // Percentile
-        //TODO
-//        adultUsers.percentile(95, ServiceB.GET_USER, TimeUnit.MILLISECONDS)
-//                .ifPresent(p95 -> System.out.println(ServiceB.GET_USER + " p95 time : " + p95 + " ms"));
-
-
-        // TODO total time
-//        System.out.println("TOTAL time: "+adultUsers.elapsed(TimeUnit.MILLISECONDS));
-
-
-
-    }
-
-    private static Timed<Class<Void>> checkAuthentication() {
-        final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted();
-        DoStuff.sleep();
-        stopwatch.stop();
-        return Timed.of(Void.TYPE, Timed.Stopwatch.of(CHECK_AUTHENTICATION, stopwatch));
+        // Total elapsed
+        System.out.println("Total time: " + adultUsers.elapsed(TimeUnit.MILLISECONDS) + " ms");
     }
 
 }
