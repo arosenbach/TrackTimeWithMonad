@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Timed")
 class TimedTest {
@@ -27,14 +28,14 @@ class TimedTest {
 
         @ParameterizedTest(name = "Timed({0},\"{1}\") ≠ Timed({2},\"{3}\")")
         @CsvSource({"41,timedX, 42, timedX", "42,timedX, 42, timedY"})
-        void notEquals(int valueX, String nameX, int valueY, String nameY) {
-            final Timed<Integer> timedX = Timed.of(valueX, Stopwatch.of(nameX, makeStopwatch()));
-            final Timed<Integer> timedY = Timed.of(valueY, Stopwatch.of(nameY, makeStopwatch()));
+        void notEquals(int valueX, String idX, int valueY, String idY) {
+            final Timed<Integer> timedX = Timed.of(valueX, Stopwatch.of(idX, makeStopwatch()));
+            final Timed<Integer> timedY = Timed.of(valueY, Stopwatch.of(idY, makeStopwatch()));
             assertNotEquals(timedX, timedY);
         }
 
         @Test
-        @DisplayName("compares only values and stopwatch names")
+        @DisplayName("compares only values and stopwatch ids")
         void equals() {
             final Timed<Integer> timedX = Timed.of(41, Stopwatch.of("timedX", makeStopwatch()));
             final Timed<Integer> timedY = Timed.of(41, Stopwatch.of("timedX", makeStopwatch()));
@@ -43,7 +44,7 @@ class TimedTest {
 
 
         @Test
-        @DisplayName("compares only values and stopwatch names - multiple stopwatches")
+        @DisplayName("compares only values and stopwatch ids - multiple stopwatches")
         void equalsMultiple() {
             final Timed<Integer> timedX = Timed.of("X", Stopwatch.of("foo", makeStopwatch()))
                     .flatMap(() -> Timed.of(42, Stopwatch.of("bar", makeStopwatch())));
@@ -57,7 +58,7 @@ class TimedTest {
     @DisplayName("TimedTest::elapsed")
     class Elapsed {
         @Test
-        @DisplayName("with no 'name' parameter returns total time")
+        @DisplayName("with no 'id' parameter returns total time")
         void totalElapsed() {
             final Timed<Integer> timed = makeTimed("timed1", 42, 300)
                     .flatMap(() -> makeTimed("timed2", 42, 100));
@@ -66,13 +67,21 @@ class TimedTest {
         }
 
         @Test
-        @DisplayName("with 'name' parameter returns the sum the times of a named stopwatch")
+        @DisplayName("with 'id' parameter returns the sum the times of the corresponding stopwatch")
         void elapsed() {
             final Timed<Integer> timed = makeTimed("timed", 42, 300)
                     .flatMap(() -> makeTimed("timed", 42, 100));
             final OptionalLong actual = timed.elapsed("timed", TimeUnit.MILLISECONDS);
             assertEquals(roundedMillis(300 + 100),
-                    roundedMillis(actual.getAsLong()));
+                    roundedMillis(actual.orElse(0L)));
+        }
+
+        @Test
+        @DisplayName("invalid 'id' parameter returns empty result")
+        void elapsedUnknownId() {
+            final Timed<Integer> timed = makeTimed("foo", 42, 300);
+            final OptionalLong actual = timed.elapsed("bar", TimeUnit.MILLISECONDS);
+            assertTrue(actual.isEmpty());
         }
     }
 
@@ -80,7 +89,7 @@ class TimedTest {
     @DisplayName("TimedTest::average ")
     class Average {
         @Test
-        @DisplayName("returns the average time of a named stopwatch")
+        @DisplayName("returns the average time of a stopwatch")
         void average() {
             final Timed<Integer> timed = makeTimed("timed", 42, 100)
                     .flatMap(() -> makeTimed("timed", 42, 200))
@@ -89,7 +98,16 @@ class TimedTest {
                     .flatMap(() -> makeTimed("timed", 42, 100));
             final OptionalDouble actual = timed.average("timed", TimeUnit.MILLISECONDS);
             assertEquals(roundedMillis((100 + 200 + 100 + 100 + 100) / 5),
-                    roundedMillis((long) actual.getAsDouble()));
+                    roundedMillis((long) actual.orElse(0)));
+        }
+
+
+        @Test
+        @DisplayName("invalid 'id' parameter returns empty result")
+        void averageUnknownId() {
+            final Timed<Integer> timed = makeTimed("foo", 42, 300);
+            final OptionalDouble actual = timed.average("bar", TimeUnit.MILLISECONDS);
+            assertTrue(actual.isEmpty());
         }
     }
 
@@ -102,7 +120,15 @@ class TimedTest {
                     .flatMap(() -> makeTimed("timed", 42, 300));
             final OptionalLong actual = timed.min("timed", TimeUnit.MILLISECONDS);
             assertEquals(roundedMillis(100),
-                    roundedMillis(actual.getAsLong()));
+                    roundedMillis(actual.orElse(0)));
+        }
+
+        @Test
+        @DisplayName("min: invalid 'id' parameter returns empty result")
+        void minUnknownId() {
+            final Timed<Integer> timed = makeTimed("foo", 42, 300);
+            final OptionalLong actual = timed.min("bar", TimeUnit.MILLISECONDS);
+            assertTrue(actual.isEmpty());
         }
 
         @Test
@@ -111,7 +137,16 @@ class TimedTest {
                     .flatMap(() -> makeTimed("timed", 42, 300));
             final OptionalLong actual = timed.max("timed", TimeUnit.MILLISECONDS);
             assertEquals(roundedMillis(300),
-                    roundedMillis(actual.getAsLong()));
+                    roundedMillis(actual.orElse(0)));
+        }
+
+
+        @Test
+        @DisplayName("max: invalid 'id' parameter returns empty result")
+        void maxUnknownId() {
+            final Timed<Integer> timed = makeTimed("foo", 42, 300);
+            final OptionalLong actual = timed.max("bar", TimeUnit.MILLISECONDS);
+            assertTrue(actual.isEmpty());
         }
     }
 
@@ -183,7 +218,7 @@ class TimedTest {
     @DisplayName("Timed::lift")
     class LiftMethod {
 
-        public static final String STOPWATCH_NAME = "aName";
+        public static final String STOPWATCH_ID = "anId";
 
         private int returns42In300ms() {
             try {
@@ -195,17 +230,17 @@ class TimedTest {
         }
 
         private Timed<Integer> returnsTimed42In300ms() {
-            return makeTimed(STOPWATCH_NAME, 42, 300);
+            return makeTimed(STOPWATCH_ID, 42, 300);
         }
 
         @Test
         @DisplayName("transforms a Suplier<T> into of Supplier<Timed<T>>")
         void supplier() {
-            final Timed<Integer> actual = Timed.lift("aName", (Supplier<Integer>) this::returns42In300ms).get();
+            final Timed<Integer> actual = Timed.lift("anId", (Supplier<Integer>) this::returns42In300ms).get();
             final Timed<Integer> expected = this.returnsTimed42In300ms();
             assertEquals(expected, actual);
-            assertEquals(roundedMillis(expected.elapsed("aName", TimeUnit.MILLISECONDS).orElse(0L)),
-                    roundedMillis(actual.elapsed("aName", TimeUnit.MILLISECONDS).orElse(0L)));
+            assertEquals(roundedMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
+                    roundedMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)));
 
         }
 
@@ -221,11 +256,11 @@ class TimedTest {
         @Test
         @DisplayName("transforms a Function<A,T> into of Function<A,<Timed<T>>")
         void function() {
-            final Timed<Integer> actual = Timed.lift("aName", (Function<Integer, Integer>) this::returns42In300ms).apply(42);
+            final Timed<Integer> actual = Timed.lift("anId", (Function<Integer, Integer>) this::returns42In300ms).apply(42);
             final Timed<Integer> expected = this.returnsTimed42In300ms(42);
             assertEquals(expected, actual);
-            assertEquals(roundedMillis(expected.elapsed("aName", TimeUnit.MILLISECONDS).orElse(0L)),
-                    roundedMillis(actual.elapsed("aName", TimeUnit.MILLISECONDS).orElse(0L)));
+            assertEquals(roundedMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
+                    roundedMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)));
 
         }
 
@@ -240,17 +275,17 @@ class TimedTest {
         @Test
         @DisplayName("transforms a BiFunction<A,B,T> into of BiFunction<A,B,<Timed<T>>")
         void biFunction() {
-            final Timed<Integer> actual = Timed.lift("aName", (BiFunction<Integer, Integer, Integer>) this::returns42In300ms).apply(42, 42);
+            final Timed<Integer> actual = Timed.lift("anId", (BiFunction<Integer, Integer, Integer>) this::returns42In300ms).apply(42, 42);
             final Timed<Integer> expected = this.returnsTimed42In300ms(42, 42);
             assertEquals(expected, actual);
-            assertEquals(roundedMillis(expected.elapsed("aName", TimeUnit.MILLISECONDS).orElse(0L)),
-                    roundedMillis(actual.elapsed("aName", TimeUnit.MILLISECONDS).orElse(0L)));
+            assertEquals(roundedMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
+                    roundedMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)));
 
         }
 
     }
 
-    private Timed<Integer> makeTimed(final String name, final int value, final int millis) {
+    private Timed<Integer> makeTimed(final String id, final int value, final int millis) {
         final com.google.common.base.Stopwatch stopwatch = makeStopwatch();
         try {
             Thread.sleep(millis);
@@ -258,7 +293,7 @@ class TimedTest {
             e.printStackTrace();
         }
         stopwatch.stop();
-        return Timed.of(value, Stopwatch.of(name, stopwatch));
+        return Timed.of(value, Stopwatch.of(id, stopwatch));
     }
 
     private com.google.common.base.Stopwatch makeStopwatch() {
