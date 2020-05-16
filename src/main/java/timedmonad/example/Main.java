@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 
 public class Main {
 
-    public static final String CHECK_AUTHENTICATION = "checkAuthentication";
-    public static final String GET_USER_IDS = "ServiceA::getUserIds";
-    public static final String FILTER_ADULTS = "ServiceB::filterAdults";
+    private static final String CHECK_AUTHENTICATION = "checkAuthentication";
+    private static final String GET_USER_IDS = "ServiceA::getUserIds";
+    private static final String FILTER_ADULTS = "ServiceB::filterAdults";
 
     public static void main(String... args) {
         final ServiceA serviceA = new ServiceA();

@@ -19,18 +19,16 @@ public class ServiceB {
                 .map(Timed.lift(GET_USER, this::getUser))
                 .reduce(Timed.empty(Collections.emptyList()),
                         (acc, next) -> acc.append(next, ListFunction::add),
-                        (timedListA, timedListB) -> timedListA.append(timedListB, this::concatenateLists));
+                        (timedListA, timedListB) -> timedListA.append(timedListB, ListFunction::concatenate));
 
         /* This does the same, using a for-loop */
-//        Timed<List<Record>> result = Timed.empty(Collections.emptyList());
+//        Timed<List<User>> result = Timed.empty(Collections.emptyList());
 //        for (String id : ids) {
-//            result = result.append(getUser(id), ListFunction::add);
+//            result = result.append(
+//                    Timed.lift(GET_USER, this::getUser).apply(id),
+//                    ListFunction::add);
 //        }
 //        return result;
-    }
-
-    private <T> List<T> concatenateLists(List<T> listA, List<T> listB) {
-        return Stream.concat(listA.stream(), listB.stream()).collect(toList());
     }
 
     public User getUser(final String userId) {
@@ -39,7 +37,7 @@ public class ServiceB {
     }
 
     public List<User> filterAdults(final List<User> users) {
-      return users.stream().filter(User::isAdult).collect(toList());
+        return users.stream().filter(User::isAdult).collect(toList());
     }
 
 }
