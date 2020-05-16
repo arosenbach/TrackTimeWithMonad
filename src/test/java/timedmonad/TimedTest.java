@@ -16,8 +16,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Timed")
 class TimedTest {
@@ -81,7 +81,7 @@ class TimedTest {
         void elapsedUnknownId() {
             final Timed<Integer> timed = makeTimed("foo", 42, 300);
             final OptionalLong actual = timed.elapsed("bar", TimeUnit.MILLISECONDS);
-            assertTrue(actual.isEmpty());
+            assertFalse(actual.isPresent());
         }
     }
 
@@ -107,7 +107,7 @@ class TimedTest {
         void averageUnknownId() {
             final Timed<Integer> timed = makeTimed("foo", 42, 300);
             final OptionalDouble actual = timed.average("bar", TimeUnit.MILLISECONDS);
-            assertTrue(actual.isEmpty());
+            assertFalse(actual.isPresent());
         }
     }
 
@@ -128,7 +128,7 @@ class TimedTest {
         void minUnknownId() {
             final Timed<Integer> timed = makeTimed("foo", 42, 300);
             final OptionalLong actual = timed.min("bar", TimeUnit.MILLISECONDS);
-            assertTrue(actual.isEmpty());
+            assertFalse(actual.isPresent());
         }
 
         @Test
@@ -146,7 +146,7 @@ class TimedTest {
         void maxUnknownId() {
             final Timed<Integer> timed = makeTimed("foo", 42, 300);
             final OptionalLong actual = timed.max("bar", TimeUnit.MILLISECONDS);
-            assertTrue(actual.isEmpty());
+            assertFalse(actual.isPresent());
         }
     }
 
@@ -218,7 +218,7 @@ class TimedTest {
     @DisplayName("Timed::lift")
     class LiftMethod {
 
-        public static final String STOPWATCH_ID = "anId";
+        static final String STOPWATCH_ID = "anId";
 
         private int returns42In300ms() {
             try {
