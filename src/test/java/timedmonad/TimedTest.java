@@ -8,8 +8,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import timedmonad.Timed.Stopwatch;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
@@ -18,10 +16,12 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Timed")
 class TimedTest {
@@ -181,7 +181,7 @@ class TimedTest {
     class Percentile {
 
         @ParameterizedTest(name = "p{0}")
-        @CsvSource({"10,100", "25,117", "50,350", "75, 537", "90, 670"})
+        @CsvSource({"10,150", "25,225", "50,350", "75, 475", "90, 550"})
         void percentile(int p, long expected) {
             final Timed<String> timed = makeTimed("timed", 42, 100)
                     .flatMap(() -> makeTimed("timed", "foobar", 200))
@@ -189,9 +189,22 @@ class TimedTest {
                     .flatMap(() -> makeTimed("timed", "foobar", 400))
                     .flatMap(() -> makeTimed("timed", "foobar", 500))
                     .flatMap(() -> makeTimed("timed", "foobar", 600));
-            final OptionalLong actual = timed.percentile(p, "timed", TimeUnit.SECONDS);
-            assertEquals(expected,
-                    actual.orElse(0));
+            final OptionalLong actual = timed.percentile(p, "timed", TimeUnit.MILLISECONDS);
+            assertEquals(expected, actual.orElse(0));
+        }
+
+        @ParameterizedTest()
+        @CsvSource({"-1", "0", "101"})
+        @DisplayName("throws exception with bad percentile parameter values")
+        void exception(final int p){
+            final Timed<String> timed = makeTimed("timed", 42, 100)
+                    .flatMap(() -> makeTimed("timed", "foobar", 200))
+                    .flatMap(() -> makeTimed("timed", "foobar", 300))
+                    .flatMap(() -> makeTimed("timed", "foobar", 400))
+                    .flatMap(() -> makeTimed("timed", "foobar", 500))
+                    .flatMap(() -> makeTimed("timed", "foobar", 600));
+
+            assertThrows(IllegalArgumentException.class, () -> timed.percentile(p, "timed", TimeUnit.MILLISECONDS));
         }
 
         @Test
@@ -274,6 +287,7 @@ class TimedTest {
     class Lift {
 
         static final String STOPWATCH_ID = "anId";
+        private static final long EPSILON = 10L;
 
         private int returns42In300ms() {
             try {
@@ -293,11 +307,11 @@ class TimedTest {
         void supplier() {
             final Timed<Integer> actual = Timed.lift("anId", (Supplier<Integer>) this::returns42In300ms).get();
             final Timed<Integer> expected = this.returnsTimed42In300ms();
+            long expectedElapsed = expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L);
+            long actualElapsed = actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L);
             assertAll(
                     () -> assertEquals(expected, actual),
-                    () -> assertEquals(
-                            roundMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
-                            roundMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)))
+                    () -> assertTrue(Math.abs(actualElapsed - expectedElapsed) < EPSILON)
             );
 
         }
@@ -316,11 +330,11 @@ class TimedTest {
         void function() {
             final Timed<Integer> actual = Timed.lift("anId", (Function<Integer, Integer>) this::returns42In300ms).apply(42);
             final Timed<Integer> expected = this.returnsTimed42In300ms(42);
+            long expectedElapsed = expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L);
+            long actualElapsed = actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L);
             assertAll(
                     () -> assertEquals(expected, actual),
-                    () -> assertEquals(
-                            roundMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
-                            roundMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)))
+                    () -> assertTrue(Math.abs(actualElapsed - expectedElapsed) < EPSILON)
             );
 
         }
@@ -338,18 +352,13 @@ class TimedTest {
         void biFunction() {
             final Timed<Integer> actual = Timed.lift("anId", (BiFunction<Integer, Integer, Integer>) this::returns42In300ms).apply(42, 42);
             final Timed<Integer> expected = this.returnsTimed42In300ms(42, 42);
+            long expectedElapsed = expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L);
+            long actualElapsed = actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L);
             assertAll(
                     () -> assertEquals(expected, actual),
-                    () -> assertEquals(
-                            roundMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
-                            roundMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)))
+                    () -> assertTrue(Math.abs(actualElapsed - expectedElapsed) < EPSILON)
             );
 
-        }
-
-        private float roundMillis(final long millis) {
-            final BigDecimal bd = new BigDecimal(millis / 1000F).setScale(2, RoundingMode.HALF_UP);
-            return bd.floatValue();
         }
 
     }

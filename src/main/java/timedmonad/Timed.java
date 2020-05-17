@@ -1,6 +1,7 @@
 package timedmonad;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.math.Quantiles;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -185,16 +186,8 @@ public class Timed<A> {
         final List<Long> sorted = stopwatches.stream()
                 .map(Stopwatch::getStopwatch)
                 .map(stopwatch -> stopwatch.elapsed(timeUnit))
-                .sorted()
                 .collect(toList());
-
-        final double position = (sorted.size() - 1) * (percent / 100f);
-        final int base = (int) Math.floor(position);
-        final long rest = (long) position - base;
-        if (base < sorted.size() - 1) {
-            return OptionalLong.of(sorted.get(base) + rest * (sorted.get(base + 1) - sorted.get(base)));
-        }
-        return OptionalLong.of(sorted.get(base));
+        return OptionalLong.of((long) Quantiles.percentiles().index(percent).compute(sorted));
     }
 
     @Override
