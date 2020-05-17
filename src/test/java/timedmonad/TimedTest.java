@@ -1,5 +1,6 @@
 package timedmonad;
 
+import com.google.common.testing.FakeTicker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -7,14 +8,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import timedmonad.Timed.Stopwatch;
 
-import java.text.DecimalFormat;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -62,8 +66,8 @@ class TimedTest {
         void totalElapsed() {
             final Timed<Integer> timed = makeTimed("timed1", 42, 300)
                     .flatMap(() -> makeTimed("timed2", 42, 100));
-            assertEquals(roundedMillis(300 + 100),
-                    roundedMillis(timed.elapsed(TimeUnit.MILLISECONDS)));
+            assertEquals(300 + 100,
+                    timed.elapsed(TimeUnit.MILLISECONDS));
         }
 
         @Test
@@ -72,8 +76,8 @@ class TimedTest {
             final Timed<Integer> timed = makeTimed("timed", 42, 300)
                     .flatMap(() -> makeTimed("timed", 42, 100));
             final OptionalLong actual = timed.elapsed("timed", TimeUnit.MILLISECONDS);
-            assertEquals(roundedMillis(300 + 100),
-                    roundedMillis(actual.orElse(0L)));
+            assertEquals(300 + 100,
+                    actual.orElse(0L));
         }
 
         @Test
@@ -97,8 +101,9 @@ class TimedTest {
                     .flatMap(() -> makeTimed("timed", 42, 100))
                     .flatMap(() -> makeTimed("timed", 42, 100));
             final OptionalDouble actual = timed.average("timed", TimeUnit.MILLISECONDS);
-            assertEquals(roundedMillis((100 + 200 + 100 + 100 + 100) / 5),
-                    roundedMillis((long) actual.orElse(0)));
+            final int expected = (100 + 200 + 100 + 100 + 100) / 5;
+            assertEquals(expected,
+                    (long) actual.orElse(0));
         }
 
 
@@ -119,8 +124,8 @@ class TimedTest {
             final Timed<Integer> timed = makeTimed("timed", 42, 100)
                     .flatMap(() -> makeTimed("timed", 42, 300));
             final OptionalLong actual = timed.min("timed", TimeUnit.MILLISECONDS);
-            assertEquals(roundedMillis(100),
-                    roundedMillis(actual.orElse(0)));
+            assertEquals(100,
+                    actual.orElse(0));
         }
 
         @Test
@@ -136,8 +141,8 @@ class TimedTest {
             final Timed<Integer> timed = makeTimed("timed", 42, 100)
                     .flatMap(() -> makeTimed("timed", 42, 300));
             final OptionalLong actual = timed.max("timed", TimeUnit.MILLISECONDS);
-            assertEquals(roundedMillis(300),
-                    roundedMillis(actual.orElse(0)));
+            assertEquals(300,
+                    actual.orElse(0));
         }
 
 
@@ -148,6 +153,55 @@ class TimedTest {
             final OptionalLong actual = timed.max("bar", TimeUnit.MILLISECONDS);
             assertFalse(actual.isPresent());
         }
+    }
+
+    @Nested
+    @DisplayName("Timed::count")
+    class Count {
+        @Test
+        void count() {
+            final Timed<String> timed = makeTimed("timed", 42, 100)
+                    .flatMap(() -> makeTimed("timed", "foobar", 300));
+            final OptionalInt actual = timed.count("timed");
+            assertEquals(OptionalInt.of(2), actual);
+        }
+
+        @Test
+        @DisplayName("count: invalid 'id' parameter returns empty result")
+        void countUnknownId() {
+            final Timed<Integer> timed = makeTimed("foo", 42, 300);
+            final OptionalInt actual = timed.count("bar");
+            assertFalse(actual.isPresent());
+        }
+    }
+
+
+    @Nested
+    @DisplayName("Timed::percentile")
+    class Percentile {
+
+        @ParameterizedTest(name = "p{0}")
+        @CsvSource({"10,100", "25,117", "50,350", "75, 537", "90, 670"})
+        void percentile(int p, long expected) {
+            final Timed<String> timed = makeTimed("timed", 42, 100)
+                    .flatMap(() -> makeTimed("timed", "foobar", 200))
+                    .flatMap(() -> makeTimed("timed", "foobar", 300))
+                    .flatMap(() -> makeTimed("timed", "foobar", 400))
+                    .flatMap(() -> makeTimed("timed", "foobar", 500))
+                    .flatMap(() -> makeTimed("timed", "foobar", 600));
+            final OptionalLong actual = timed.percentile(p, "timed", TimeUnit.SECONDS);
+            assertEquals(expected,
+                    actual.orElse(0));
+        }
+
+        @Test
+        @DisplayName("percentile: invalid 'id' parameter returns empty result")
+        void percentileUnknownId() {
+            final Timed<Integer> timed = makeTimed("foo", 42, 300);
+            final OptionalLong actual = timed.percentile(50, "bar", TimeUnit.MILLISECONDS);
+            assertFalse(actual.isPresent());
+        }
+
     }
 
     @Nested
@@ -217,7 +271,7 @@ class TimedTest {
 
     @Nested
     @DisplayName("Timed::lift")
-    class LiftMethod {
+    class Lift {
 
         static final String STOPWATCH_ID = "anId";
 
@@ -239,9 +293,12 @@ class TimedTest {
         void supplier() {
             final Timed<Integer> actual = Timed.lift("anId", (Supplier<Integer>) this::returns42In300ms).get();
             final Timed<Integer> expected = this.returnsTimed42In300ms();
-            assertEquals(expected, actual);
-            assertEquals(roundedMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
-                    roundedMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)));
+            assertAll(
+                    () -> assertEquals(expected, actual),
+                    () -> assertEquals(
+                            roundMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
+                            roundMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)))
+            );
 
         }
 
@@ -259,9 +316,12 @@ class TimedTest {
         void function() {
             final Timed<Integer> actual = Timed.lift("anId", (Function<Integer, Integer>) this::returns42In300ms).apply(42);
             final Timed<Integer> expected = this.returnsTimed42In300ms(42);
-            assertEquals(expected, actual);
-            assertEquals(roundedMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
-                    roundedMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)));
+            assertAll(
+                    () -> assertEquals(expected, actual),
+                    () -> assertEquals(
+                            roundMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
+                            roundMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)))
+            );
 
         }
 
@@ -278,31 +338,37 @@ class TimedTest {
         void biFunction() {
             final Timed<Integer> actual = Timed.lift("anId", (BiFunction<Integer, Integer, Integer>) this::returns42In300ms).apply(42, 42);
             final Timed<Integer> expected = this.returnsTimed42In300ms(42, 42);
-            assertEquals(expected, actual);
-            assertEquals(roundedMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
-                    roundedMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)));
+            assertAll(
+                    () -> assertEquals(expected, actual),
+                    () -> assertEquals(
+                            roundMillis(expected.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)),
+                            roundMillis(actual.elapsed("anId", TimeUnit.MILLISECONDS).orElse(0L)))
+            );
 
+        }
+
+        private float roundMillis(final long millis) {
+            final BigDecimal bd = new BigDecimal(millis / 1000F).setScale(2, RoundingMode.HALF_UP);
+            return bd.floatValue();
         }
 
     }
 
-    private Timed<Integer> makeTimed(final String id, final int value, final int millis) {
-        final com.google.common.base.Stopwatch stopwatch = makeStopwatch();
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private <T> Timed<T> makeTimed(final String id, final T value, final int millis) {
+        final com.google.common.base.Stopwatch stopwatch = makeStopwatch(millis);
         stopwatch.stop();
         return Timed.of(value, Stopwatch.of(id, stopwatch));
     }
 
     private com.google.common.base.Stopwatch makeStopwatch() {
-        return com.google.common.base.Stopwatch.createStarted();
+        return makeStopwatch(111);
     }
 
-    private String roundedMillis(final long millis) {
-        return new DecimalFormat("0.0").format(millis / 1000F);
+    private com.google.common.base.Stopwatch makeStopwatch(long millis) {
+        final FakeTicker ticker = new FakeTicker();
+        final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted(ticker);
+        ticker.advance(millis, TimeUnit.MILLISECONDS);
+        return stopwatch;
     }
 
 }
