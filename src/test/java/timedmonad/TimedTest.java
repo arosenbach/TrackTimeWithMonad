@@ -209,7 +209,8 @@ class TimedTest {
             final Function<Integer, Timed<Integer>> f = x -> Timed.of(x * 2, Stopwatch.of("x*2", makeStopwatch()));
             final Function<Integer, Timed<Integer>> g = x -> Timed.of(x + 1, Stopwatch.of("x+1", makeStopwatch()));
 
-            assertEquals((timedX.flatMap(g)).flatMap(f), timedX.flatMap(x -> g.apply(x).flatMap(f)));
+            assertEquals((timedX.flatMap(g)).flatMap(f),
+                    timedX.flatMap(x -> g.apply(x).flatMap(f)));
         }
     }
 

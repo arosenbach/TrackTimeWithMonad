@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -163,6 +164,37 @@ public class Timed<A> {
                 .map(Stopwatch::getStopwatch)
                 .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
                 .max();
+    }
+
+    public OptionalInt count(String id){
+        final List<Stopwatch> stopwatches = this.stopwatches.get(id);
+        if (stopwatches == null) {
+            return OptionalInt.empty();
+        }
+        return OptionalInt.of(stopwatches.size());
+    }
+
+    public OptionalLong percentile(int percent, String id, final TimeUnit timeUnit) {
+        if (percent <= 0 || percent > 100) {
+            throw new IllegalArgumentException("Invalid percentile: " + percent);
+        }
+        final List<Stopwatch> stopwatches = this.stopwatches.get(id);
+        if (stopwatches == null) {
+            return OptionalLong.empty();
+        }
+        final List<Long> sorted = stopwatches.stream()
+                .map(Stopwatch::getStopwatch)
+                .map(stopwatch -> stopwatch.elapsed(timeUnit))
+                .sorted()
+                .collect(toList());
+
+        final double position = (sorted.size() - 1) * (percent / 100f);
+        final int base = (int) Math.floor(position);
+        final long rest = (long) position - base;
+        if (base < sorted.size() - 1) {
+            return OptionalLong.of(sorted.get(base) + rest * (sorted.get(base + 1) - sorted.get(base)));
+        }
+        return OptionalLong.of(sorted.get(base));
     }
 
     @Override

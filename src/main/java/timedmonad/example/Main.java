@@ -22,6 +22,7 @@ public class Main {
                 .flatMap(serviceB::getUsers)
                 .flatMap(Timed.lift(FILTER_ADULTS, serviceB::filterAdults));
 
+        System.out.println("====== Use the value =======");
         System.out.println("List of adult users: " + adultUsers.getValue()
                 .stream()
                 .map(User::getId)
@@ -56,9 +57,19 @@ public class Main {
 
         // Min / Max
         adultUsers.min(ServiceB.GET_USER, TimeUnit.MILLISECONDS)
-                .ifPresent(avg -> System.out.println(ServiceB.GET_USER + " min time : " + avg + " ms"));
+                .ifPresent(min -> System.out.println(ServiceB.GET_USER + " min time : " + min + " ms"));
         adultUsers.max(ServiceB.GET_USER, TimeUnit.MILLISECONDS)
-                .ifPresent(avg -> System.out.println(ServiceB.GET_USER + " max time : " + avg + " ms"));
+                .ifPresent(max -> System.out.println(ServiceB.GET_USER + " max time : " + max + " ms"));
+
+        // Count
+        adultUsers.count(ServiceB.GET_USER)
+                .ifPresent(cnt -> System.out.println(ServiceB.GET_USER + " count : " + cnt));
+
+        // Percentile
+        adultUsers.percentile(50, ServiceB.GET_USER, TimeUnit.MILLISECONDS)
+                .ifPresent(p95 -> System.out.println(ServiceB.GET_USER + " median time : " + p95 + " ms"));
+        adultUsers.percentile(95, ServiceB.GET_USER, TimeUnit.MILLISECONDS)
+                .ifPresent(p95 -> System.out.println(ServiceB.GET_USER + " p95 time : " + p95 + " ms"));
 
         // Total elapsed
         System.out.println("Total time: " + adultUsers.elapsed(TimeUnit.MILLISECONDS) + " ms");
