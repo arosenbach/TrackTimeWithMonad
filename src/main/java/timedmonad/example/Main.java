@@ -67,7 +67,7 @@ public class Main {
 
         // Percentile
         adultUsers.percentile(50, ServiceB.GET_USER, TimeUnit.MILLISECONDS)
-                .ifPresent(p95 -> System.out.println(ServiceB.GET_USER + " median time : " + p95 + " ms"));
+                .ifPresent(p50 -> System.out.println(ServiceB.GET_USER + " median time : " + p50 + " ms"));
         adultUsers.percentile(95, ServiceB.GET_USER, TimeUnit.MILLISECONDS)
                 .ifPresent(p95 -> System.out.println(ServiceB.GET_USER + " p95 time : " + p95 + " ms"));
 
