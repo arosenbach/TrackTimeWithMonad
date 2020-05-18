@@ -1,6 +1,7 @@
 package timedmonad;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.math.Quantiles;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -163,6 +165,29 @@ public class Timed<A> {
                 .map(Stopwatch::getStopwatch)
                 .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
                 .max();
+    }
+
+    public OptionalInt count(String id){
+        final List<Stopwatch> stopwatches = this.stopwatches.get(id);
+        if (stopwatches == null) {
+            return OptionalInt.empty();
+        }
+        return OptionalInt.of(stopwatches.size());
+    }
+
+    public OptionalLong percentile(int percent, String id, final TimeUnit timeUnit) {
+        if (percent <= 0 || percent > 100) {
+            throw new IllegalArgumentException("Invalid percentile: " + percent);
+        }
+        final List<Stopwatch> stopwatches = this.stopwatches.get(id);
+        if (stopwatches == null) {
+            return OptionalLong.empty();
+        }
+        final List<Long> sorted = stopwatches.stream()
+                .map(Stopwatch::getStopwatch)
+                .map(stopwatch -> stopwatch.elapsed(timeUnit))
+                .collect(toList());
+        return OptionalLong.of((long) Quantiles.percentiles().index(percent).compute(sorted));
     }
 
     @Override
