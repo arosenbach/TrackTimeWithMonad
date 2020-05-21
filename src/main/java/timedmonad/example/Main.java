@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
 
 public class Main {
 
@@ -43,8 +44,8 @@ public class Main {
         System.out.println("====== Value =======");
         System.out.println("List of adult users: " + adultUsers.getValue()
                 .stream()
-                .map(User::getId)
-                .collect(Collectors.joining(", ")));
+                .map(User::toString)
+                .collect(joining(", ")));
     }
 
     private static void printTimes(final Timed<List<User>> adultUsers) {
