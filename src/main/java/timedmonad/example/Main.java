@@ -1,10 +1,13 @@
 package timedmonad.example;
 
+import com.google.common.base.Stopwatch;
 import timedmonad.Timed;
 import timedmonad.example.util.DoStuff;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -17,25 +20,31 @@ public class Main {
         final ServiceA serviceA = new ServiceA();
         final ServiceB serviceB = new ServiceB();
 
+        final Supplier<Timed<List<String>>> getUserIds = Timed.lift(GET_USER_IDS, serviceA::getUserIds);
+        final Function<List<User>, Timed<List<User>>> filterAdults = Timed.lift(FILTER_ADULTS, serviceB::filterAdults);
+
         final Timed<List<User>> adultUsers = checkAuthentication()
-                .flatMap(Timed.lift(GET_USER_IDS, serviceA::getUserIds))
+                .flatMap(getUserIds)
                 .flatMap(serviceB::getUsers)
-                .flatMap(Timed.lift(FILTER_ADULTS, serviceB::filterAdults));
+                .flatMap(filterAdults);
 
-        System.out.println("====== Use the value =======");
-        System.out.println("List of adult users: " + adultUsers.getValue()
-                .stream()
-                .map(User::getId)
-                .collect(Collectors.joining(", ")));
-
+        printValue(adultUsers);
         printTimes(adultUsers);
     }
 
     private static Timed<Class<Void>> checkAuthentication() {
-        final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted();
+        final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.sleep();
         stopwatch.stop();
         return Timed.of(Void.TYPE, Timed.Stopwatch.of(CHECK_AUTHENTICATION, stopwatch));
+    }
+
+    private static void printValue(final Timed<List<User>> adultUsers) {
+        System.out.println("====== Value =======");
+        System.out.println("List of adult users: " + adultUsers.getValue()
+                .stream()
+                .map(User::getId)
+                .collect(Collectors.joining(", ")));
     }
 
     private static void printTimes(final Timed<List<User>> adultUsers) {
