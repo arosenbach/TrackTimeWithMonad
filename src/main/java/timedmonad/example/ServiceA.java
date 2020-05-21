@@ -11,7 +11,7 @@ import static java.util.stream.Collectors.toList;
 public class ServiceA {
 
     public List<String> getUserIds() {
-        DoStuff.sleep();
+        DoStuff.takeSomeTime();
         return IntStream.range(Random.getRandomInt(10, 15), Random.getRandomInt(25, 35))
                 .boxed().map(n -> "user" + n)
                 .collect(toList());

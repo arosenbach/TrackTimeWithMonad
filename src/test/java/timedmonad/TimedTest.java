@@ -219,10 +219,10 @@ class TimedTest {
 
     @Nested
     @DisplayName("is a monoid with Timed::append")
-    class Monoid {
+    class Append {
 
         @Test
-        @DisplayName("right identity: x <> mempty = x)")
+        @DisplayName("right identity: x <> mempty ≡ x)")
         void rightIdentity() {
             final Timed<Integer> timedX = makeTimed("timedX", 41);
             final Timed<Integer> timedY = timedX.append(Timed.empty(0), Integer::sum);
@@ -230,7 +230,7 @@ class TimedTest {
         }
 
         @Test
-        @DisplayName("left identity: mempty <> x = x)")
+        @DisplayName("left identity: mempty <> x ≡ x)")
         void leftIdentity() {
             final Timed<Integer> timedX = makeTimed("timedX", 41);
             final Timed<Integer> timedY = Timed.empty(0).append(timedX, Integer::sum);
@@ -238,7 +238,7 @@ class TimedTest {
         }
 
         @Test
-        @DisplayName("associativity: (x <> y) <> z = x <> (y <> z)")
+        @DisplayName("associativity: (x <> y) <> z ≡ x <> (y <> z)")
         void associativity() {
             final Timed<Integer> timed1 = makeTimed("timed1", 2);
             final Timed<Integer> timed2 = makeTimed("timed2", 3);
@@ -251,7 +251,7 @@ class TimedTest {
 
     @Nested
     @DisplayName("is a monad with Timed::flatMap")
-    class Monad {
+    class FlatMap {
 
         @Test
         @DisplayName("right identity: m >>= unit ≡ m)")
