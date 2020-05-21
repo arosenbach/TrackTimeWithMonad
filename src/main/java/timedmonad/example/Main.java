@@ -36,7 +36,7 @@ public class Main {
         final Stopwatch stopwatch = Stopwatch.createStarted();
         DoStuff.sleep();
         stopwatch.stop();
-        return Timed.of(Void.TYPE, Timed.Stopwatch.of(CHECK_AUTHENTICATION, stopwatch));
+        return Timed.of(Void.TYPE, CHECK_AUTHENTICATION, stopwatch);
     }
 
     private static void printValue(final Timed<List<User>> adultUsers) {
