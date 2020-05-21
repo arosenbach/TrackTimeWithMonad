@@ -34,7 +34,7 @@ public class Main {
 
     private static Timed<Class<Void>> checkAuthentication() {
         final Stopwatch stopwatch = Stopwatch.createStarted();
-        DoStuff.sleep();
+        DoStuff.takeSomeTime();
         stopwatch.stop();
         return Timed.of(Void.TYPE, CHECK_AUTHENTICATION, stopwatch);
     }

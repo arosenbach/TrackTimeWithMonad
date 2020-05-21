@@ -118,7 +118,7 @@ public class Timed<A> {
     }
 
     /**
-     * Provides the sum of all times
+     * Provides the sum of all stopwatches
      *
      * @param timeUnit
      * @return

@@ -31,7 +31,7 @@ public class ServiceB {
     }
 
     public User getUser(final String userId) {
-        DoStuff.sleep();
+        DoStuff.takeSomeTime();
         return new User(userId);
     }
 
