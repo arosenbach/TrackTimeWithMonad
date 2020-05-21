@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import timedmonad.Timed.Stopwatch;
 
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -358,12 +357,13 @@ class TimedTest {
                 .orElse(42);
         return makeTimed(id, value, randomMillis);
     }
-        private <T> Timed<T> makeTimed(final String id, final T value, final int millis) {
-            final FakeTicker ticker = new FakeTicker();
-            final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted(ticker);
-            ticker.advance(millis, TimeUnit.MILLISECONDS);
-            stopwatch.stop();
-            return Timed.of(value, Stopwatch.of(id, stopwatch));
-        }
 
+    private <T> Timed<T> makeTimed(final String id, final T value, final int millis) {
+        final FakeTicker ticker = new FakeTicker();
+        final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted(ticker);
+        ticker.advance(millis, TimeUnit.MILLISECONDS);
+        stopwatch.stop();
+        return Timed.of(value, id, stopwatch);
     }
+
+}
