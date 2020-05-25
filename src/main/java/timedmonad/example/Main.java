@@ -1,7 +1,7 @@
 package timedmonad.example;
 
-import com.google.common.base.Stopwatch;
 import timedmonad.Timed;
+import timedmonad.Timed.Stopwatch;
 import timedmonad.example.util.DoStuff;
 
 import java.util.List;
@@ -34,10 +34,10 @@ public class Main {
     }
 
     private static Timed<Class<Void>> checkAuthentication() {
-        final Stopwatch stopwatch = Stopwatch.createStarted();
+        final Stopwatch stopwatch = Stopwatch.createStarted(CHECK_AUTHENTICATION);
         DoStuff.takeSomeTime();
         stopwatch.stop();
-        return Timed.of(Void.TYPE, Timed.Stopwatch.of(CHECK_AUTHENTICATION, stopwatch));
+        return Timed.of(Void.TYPE, stopwatch);
     }
 
     private static void printValue(final Timed<List<User>> adultUsers) {

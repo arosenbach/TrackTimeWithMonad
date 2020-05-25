@@ -1,5 +1,6 @@
 package timedmonad;
 
+import com.google.common.base.Ticker;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.math.Quantiles;
 
@@ -41,28 +42,28 @@ public class Timed<A> {
 
     public static <A> Supplier<Timed<A>> lift(final String id, final Supplier<A> supplier) {
         return () -> {
-            final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted();
+            final Stopwatch stopwatch = Stopwatch.createStarted(id);
             final A value = supplier.get();
             stopwatch.stop();
-            return Timed.of(value, Stopwatch.of(id, stopwatch));
+            return Timed.of(value, stopwatch);
         };
     }
 
     public static <A, B> Function<A, Timed<B>> lift(final String id, final Function<A, B> function) {
         return (arg) -> {
-            final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted();
+            final Stopwatch stopwatch = Stopwatch.createStarted(id);
             final B value = function.apply(arg);
             stopwatch.stop();
-            return Timed.of(value, Stopwatch.of(id, stopwatch));
+            return Timed.of(value, stopwatch);
         };
     }
 
     public static <A, B, C> BiFunction<A, B, Timed<C>> lift(final String id, final BiFunction<A, B, C> biFunction) {
         return (arg1, arg2) -> {
-            final com.google.common.base.Stopwatch stopwatch = com.google.common.base.Stopwatch.createStarted();
+            final Stopwatch stopwatch = Stopwatch.createStarted(id);
             final C value = biFunction.apply(arg1, arg2);
             stopwatch.stop();
-            return Timed.of(value, Stopwatch.of(id, stopwatch));
+            return Timed.of(value, stopwatch);
         };
     }
 
@@ -111,7 +112,6 @@ public class Timed<A> {
         }
         return OptionalLong.of(stopwatches
                 .stream()
-                .map(Stopwatch::getStopwatch)
                 .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
                 .sum());
     }
@@ -126,7 +126,6 @@ public class Timed<A> {
         return this.stopwatches.values()
                 .stream()
                 .flatMap(Collection::stream)
-                .map(Stopwatch::getStopwatch)
                 .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
                 .sum();
     }
@@ -138,7 +137,6 @@ public class Timed<A> {
         }
         return stopwatches
                 .stream()
-                .map(Stopwatch::getStopwatch)
                 .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
                 .average();
     }
@@ -150,7 +148,6 @@ public class Timed<A> {
         }
         return stopwatches
                 .stream()
-                .map(Stopwatch::getStopwatch)
                 .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
                 .min();
     }
@@ -162,12 +159,11 @@ public class Timed<A> {
         }
         return stopwatches
                 .stream()
-                .map(Stopwatch::getStopwatch)
                 .mapToLong(stopwatch -> stopwatch.elapsed(timeUnit))
                 .max();
     }
 
-    public OptionalInt count(String id){
+    public OptionalInt count(String id) {
         final List<Stopwatch> stopwatches = this.stopwatches.get(id);
         if (stopwatches == null) {
             return OptionalInt.empty();
@@ -184,7 +180,6 @@ public class Timed<A> {
             return OptionalLong.empty();
         }
         final List<Long> sorted = stopwatches.stream()
-                .map(Stopwatch::getStopwatch)
                 .map(stopwatch -> stopwatch.elapsed(timeUnit))
                 .collect(toList());
         return OptionalLong.of((long) Quantiles.percentiles().index(percent).compute(sorted));
@@ -222,16 +217,24 @@ public class Timed<A> {
             this.stopwatch = stopwatch;
         }
 
-        public static Stopwatch of(final String id, final com.google.common.base.Stopwatch stopwatch) {
-            return new Stopwatch(id, stopwatch);
+        public static Stopwatch createStarted(final String id) {
+            return new Stopwatch(id, com.google.common.base.Stopwatch.createStarted());
+        }
+
+        public static Stopwatch createStarted(final String id, final Ticker ticker) {
+            return new Stopwatch(id, com.google.common.base.Stopwatch.createStarted(ticker));
         }
 
         private String getId() {
             return id;
         }
 
-        private com.google.common.base.Stopwatch getStopwatch() {
-            return this.stopwatch;
+        public void stop() {
+            stopwatch.stop();
+        }
+
+        public long elapsed(final TimeUnit timeUnit) {
+            return stopwatch.elapsed(timeUnit);
         }
 
         @Override
