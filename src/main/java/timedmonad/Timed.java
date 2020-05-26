@@ -1,5 +1,6 @@
 package timedmonad;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Ticker;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.math.Quantiles;
@@ -75,6 +76,10 @@ public class Timed<A> {
     public <B> Timed<B> flatMap(Function<A, Timed<B>> f) {
         Timed<B> mappedTimed = f.apply(value);
         return new Timed<>(mappedTimed.value, mergeStopwatches(mappedTimed.stopwatches));
+    }
+
+    public <T> Timed<T> map(final Function<A, T> f) {
+        return this.flatMap(f.andThen(Timed::empty));
     }
 
     public <B> Timed<A> append(final Timed<B> other, BiFunction<A, B, A> mergeFunction) {
