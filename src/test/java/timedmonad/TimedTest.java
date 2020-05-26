@@ -263,9 +263,8 @@ class TimedTest {
         @Test
         @DisplayName("left identity: (unit x) >>= f ≡ f x)")
         void leftIdentity() {
-            final Timed<Integer> timedX = makeTimed("add1", 42);
-            final Function<Integer, Timed<Integer>> add1 = x -> makeTimed("add1", x + 1);
-            assertEquals(Timed.empty(41).flatMap(add1), timedX);
+            final Function<Integer, Timed<Integer>> f = x -> makeTimed("add1", x + 1);
+            assertEquals(Timed.empty(41).flatMap(f), f.apply(41));
         }
 
         @Test
@@ -278,6 +277,27 @@ class TimedTest {
 
             assertEquals((timedX.flatMap(g)).flatMap(f),
                     timedX.flatMap(x -> g.apply(x).flatMap(f)));
+        }
+    }
+
+    @Nested
+    @DisplayName("is a functor with Timed::map")
+    class Map {
+        @Test
+        @DisplayName("preserves identity morphisms: fmap id ≡ id")
+        void identity() {
+            final Timed<Integer> opt = makeTimed("map", 20);
+            assertEquals(opt.map(Function.identity()), opt);
+        }
+
+        @Test
+        @DisplayName("preserves composition of morphisms: fmap (f . g) ≡ fmap f . fmap g")
+        void map() {
+            final Function<Integer, Integer> f = x -> x * 2;
+            final Function<Integer, Integer> g = x -> x + 1;
+
+            final Timed<Integer> opt = makeTimed("map", 20);
+            assertEquals(opt.map(f).map(g), opt.map(f.andThen(g)));
         }
     }
 

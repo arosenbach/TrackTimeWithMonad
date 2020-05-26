@@ -77,6 +77,10 @@ public class Timed<A> {
         return new Timed<>(mappedTimed.value, mergeStopwatches(mappedTimed.stopwatches));
     }
 
+    public <T> Timed<T> map(final Function<A, T> f) {
+        return this.flatMap(f.andThen(Timed::empty));
+    }
+
     public <B> Timed<A> append(final Timed<B> other, BiFunction<A, B, A> mergeFunction) {
         return new Timed<>(mergeFunction.apply(value, other.value), mergeStopwatches(other.stopwatches));
     }
