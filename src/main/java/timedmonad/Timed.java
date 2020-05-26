@@ -1,6 +1,5 @@
 package timedmonad;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Ticker;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.math.Quantiles;
