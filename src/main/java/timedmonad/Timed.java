@@ -36,8 +36,8 @@ public class Timed<A> {
         return new Timed<>(value, Stream.of(stopwatch).collect(groupingBy(Stopwatch::getId)));
     }
 
-    public static <A> Timed<A> empty(A emptyValue) {
-        return new Timed<>(emptyValue, Collections.emptyMap());
+    public static <A> Timed<A> of(A value) {
+        return new Timed<>(value, Collections.emptyMap());
     }
 
     public static <A> Supplier<Timed<A>> lift(final String id, final Supplier<A> supplier) {
@@ -78,7 +78,7 @@ public class Timed<A> {
     }
 
     public <T> Timed<T> map(final Function<A, T> f) {
-        return this.flatMap(f.andThen(Timed::empty));
+        return this.flatMap(f.andThen(Timed::of));
     }
 
     public <B> Timed<A> append(final Timed<B> other, BiFunction<A, B, A> mergeFunction) {

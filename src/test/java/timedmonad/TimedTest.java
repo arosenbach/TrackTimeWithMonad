@@ -225,7 +225,7 @@ class TimedTest {
         @DisplayName("right identity: x <> mempty ≡ x)")
         void rightIdentity() {
             final Timed<Integer> timedX = makeTimed("timedX", 41);
-            final Timed<Integer> timedY = timedX.append(Timed.empty(0), Integer::sum);
+            final Timed<Integer> timedY = timedX.append(Timed.of(0), Integer::sum);
             assertEquals(timedX, timedY);
         }
 
@@ -233,7 +233,7 @@ class TimedTest {
         @DisplayName("left identity: mempty <> x ≡ x)")
         void leftIdentity() {
             final Timed<Integer> timedX = makeTimed("timedX", 41);
-            final Timed<Integer> timedY = Timed.empty(0).append(timedX, Integer::sum);
+            final Timed<Integer> timedY = Timed.of(0).append(timedX, Integer::sum);
             assertEquals(timedX, timedY);
         }
 
@@ -257,14 +257,14 @@ class TimedTest {
         @DisplayName("right identity: m >>= unit ≡ m)")
         void rightIdentity() {
             final Timed<Integer> timedX = makeTimed("timedX", 41);
-            assertEquals(timedX.flatMap(Timed::empty), timedX);
+            assertEquals(timedX.flatMap(Timed::of), timedX);
         }
 
         @Test
         @DisplayName("left identity: (unit x) >>= f ≡ f x)")
         void leftIdentity() {
             final Function<Integer, Timed<Integer>> f = x -> makeTimed("add1", x + 1);
-            assertEquals(Timed.empty(41).flatMap(f), f.apply(41));
+            assertEquals(Timed.of(41).flatMap(f), f.apply(41));
         }
 
         @Test
