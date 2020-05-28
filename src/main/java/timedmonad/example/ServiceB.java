@@ -17,12 +17,12 @@ public class ServiceB {
     public Timed<List<User>> getUsers(final List<String> ids) {
         return ids.stream()
                 .map(Timed.lift(GET_USER, this::getUser))
-                .reduce(Timed.empty(Collections.emptyList()),
+                .reduce(Timed.of(Collections.emptyList()),
                         (acc, next) -> acc.append(next, ListFunction::add),
                         (timedListA, timedListB) -> timedListA.append(timedListB, ListFunction::concatenate));
 
         /* This does the same, using a for-loop */
-//        Timed<List<User>> result = Timed.empty(Collections.emptyList());
+//        Timed<List<User>> result = Timed.of(Collections.emptyList());
 //        for (String id : ids) {
 //            result = result.append(
 //                    Timed.lift(GET_USER, this::getUser).apply(id),
