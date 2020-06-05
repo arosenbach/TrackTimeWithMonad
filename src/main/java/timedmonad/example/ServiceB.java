@@ -6,7 +6,6 @@ import timedmonad.example.util.ListFunction;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
